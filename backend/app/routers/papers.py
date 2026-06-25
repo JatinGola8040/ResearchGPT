@@ -9,8 +9,29 @@ from app.database import get_db
 from app.models import Paper
 from app.schemas import PaperResponse
 from app.config import settings
+from app.services.pdf.pdf_parser import parse_pdf
+from app.services.pdf.document_processor import process_document
 
 router = APIRouter(prefix="/papers", tags=["papers"])
+
+@router.post("/process/{paper_id}")
+def process_paper_test(paper_id: str, db: Session = Depends(get_db)):
+    """
+    Temporary endpoint for testing Feature 3 Document Processing Pipeline.
+    """
+    paper = db.query(Paper).filter(Paper.id == paper_id).first()
+    if not paper:
+        raise HTTPException(status_code=404, detail="Paper not found.")
+
+    if not os.path.exists(paper.filepath):
+        raise HTTPException(status_code=404, detail=f"PDF file missing on disk at {paper.filepath}")
+
+    try:
+        parsed_output = parse_pdf(paper.filepath)
+        processed_response = process_document(parsed_output)
+        return processed_response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Document processing failed: {str(e)}")
 
 @router.post("/upload", response_model=PaperResponse, status_code=201)
 def upload_paper(
