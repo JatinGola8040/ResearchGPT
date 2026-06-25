@@ -27,3 +27,14 @@ Thumbs.db
 
 # Python cache
 .pytest_cache/
+
+# SQLite
+backend/storage/*.db
+backend/storage/research.db
+
+# ChromaDB
+backend/storage/chroma_db/
+
+# Uploads (optional)
+backend/storage/uploads/*
+!backend/storage/uploads/.gitkeep
