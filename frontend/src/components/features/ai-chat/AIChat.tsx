@@ -6,11 +6,16 @@ import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
 import { api } from "../../../lib/api";
 
+export interface Citation {
+  paper_title: string;
+  page: number;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  citations?: string[];
+  citations?: Citation[];
 }
 
 export function AIChat() {
