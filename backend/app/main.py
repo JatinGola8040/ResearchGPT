@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from app.database import Base, engine
-from app.routers import papers
+from app.routers import papers, query
 from app.services.vector.vector_store import vector_store_service
 from app.services.vector.retriever import retrieve_relevant_chunks
 
@@ -26,15 +26,7 @@ app.add_middleware(
 
 # Register routers
 app.include_router(papers.router)
-
-# Placeholder router for Phase 2 unified query endpoint
-query_placeholder_router = APIRouter(prefix="/query", tags=["query"])
-
-@query_placeholder_router.post("")
-def query_placeholder():
-    return {"message": "Query endpoint placeholder - Phase 2"}
-
-app.include_router(query_placeholder_router)
+app.include_router(query.router)
 
 @app.get("/")
 def root():
