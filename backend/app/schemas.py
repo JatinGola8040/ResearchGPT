@@ -24,6 +24,26 @@ class PaperSummaryResponse(BaseModel):
     results: str
     limitations: str
 
+class ComparePapersRequest(BaseModel):
+    paper_ids: List[str] = Field(..., min_length=2, max_length=5)
+
+class PaperHeaderItem(BaseModel):
+    paper_id: str
+    paper_title: str
+
+class ComparisonContent(BaseModel):
+    research_objective: str
+    methodology: str
+    datasets: str
+    strengths: str
+    limitations: str
+    key_differences: List[str]
+    overall_conclusion: str
+
+class ComparePapersResponse(BaseModel):
+    papers: List[PaperHeaderItem]
+    comparison: ComparisonContent
+
 class PaperResponse(BaseModel):
     id: str
     filename: str
