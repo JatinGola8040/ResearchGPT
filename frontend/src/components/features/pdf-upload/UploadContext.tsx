@@ -47,9 +47,23 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setIsLoadingPapers(true);
     try {
       const data = await api.getPapers();
-      setPapers(data.papers || data);
+      
+      let parsedPapers: Paper[] = [];
+      if (Array.isArray(data)) {
+        parsedPapers = data;
+      } else if (data && Array.isArray(data.papers)) {
+        parsedPapers = data.papers;
+      } else if (data && Array.isArray(data.data)) {
+        parsedPapers = data.data;
+      } else {
+        console.warn("Unexpected API response format for papers:", data);
+        parsedPapers = [];
+      }
+      
+      setPapers(parsedPapers);
     } catch (error) {
       console.error("Error fetching papers:", error);
+      setPapers([]); // Fallback to empty array on error to prevent crashes
     } finally {
       setIsLoadingPapers(false);
     }
