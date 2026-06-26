@@ -1,7 +1,7 @@
 import os
 import shutil
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 
@@ -57,8 +57,8 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
     finally:
         db.close()
 
-@router.post("/process/{paper_id}")
-def process_paper_test(paper_id: str, db: Session = Depends(get_db)):
+@router.post("/process/{paper_id}", status_code=200)
+def process_paper_test(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """
     Synchronous testing endpoint executing the complete document processing & indexing pipeline.
     """
@@ -89,11 +89,15 @@ def process_paper_test(paper_id: str, db: Session = Depends(get_db)):
         db.refresh(paper)
 
         return {
-            "paper_id": paper.id,
-            "status": paper.status,
-            "title": paper.title,
-            "chunks_generated": len(processed.get("chunks", [])),
-            "chunks_indexed": chunks_stored
+            "success": True,
+            "message": "Paper synchronous processing and indexing completed.",
+            "data": {
+                "paper_id": paper.id,
+                "status": paper.status,
+                "title": paper.title,
+                "chunks_generated": len(processed.get("chunks", [])),
+                "chunks_indexed": chunks_stored
+            }
         }
     except Exception as e:
         paper.status = "failed"
@@ -101,15 +105,15 @@ def process_paper_test(paper_id: str, db: Session = Depends(get_db)):
         db.commit()
         raise HTTPException(status_code=500, detail=f"Indexing pipeline failed: {str(e)}")
 
-@router.post("/upload", response_model=PaperResponse, status_code=202)
+@router.post("/upload", status_code=201)
 def upload_paper(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
     db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     if not file.filename or not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Only PDF files are supported.")
+        raise HTTPException(status_code=400, detail="Only PDF files (.pdf) are supported.")
 
     paper_id = str(uuid.uuid4())
     unique_filename = f"{paper_id}.pdf"
@@ -118,10 +122,13 @@ def upload_paper(
     os.makedirs(upload_dir, exist_ok=True)
     file_path = os.path.join(upload_dir, unique_filename)
 
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to write uploaded file to storage: {e}")
 
-    display_title = title if title else (file.filename[:-4] if file.filename else "Untitled")
+    display_title = title if title else (file.filename[:-4] if file.filename else "Untitled Paper")
 
     new_paper = Paper(
         id=paper_id,
@@ -137,31 +144,45 @@ def upload_paper(
     # Trigger background ingestion pipeline
     background_tasks.add_task(run_ingestion_pipeline_task, paper_id, file_path)
 
-    return new_paper
+    return {
+        "success": True,
+        "message": "PDF paper uploaded successfully and background indexing started.",
+        "data": PaperResponse.model_validate(new_paper).model_dump()
+    }
 
-@router.get("", response_model=List[PaperResponse])
-def list_papers(db: Session = Depends(get_db)):
-    return db.query(Paper).order_by(Paper.created_at.desc()).all()
+@router.get("", status_code=200)
+def list_papers(db: Session = Depends(get_db)) -> Dict[str, Any]:
+    papers_db = db.query(Paper).order_by(Paper.created_at.desc()).all()
+    return {
+        "success": True,
+        "message": "Retrieved indexed research papers successfully.",
+        "data": [PaperResponse.model_validate(p).model_dump() for p in papers_db]
+    }
 
-@router.delete("/{paper_id}", status_code=204)
-def delete_paper(paper_id: str, db: Session = Depends(get_db)):
+@router.delete("/{paper_id}", status_code=200)
+def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
     paper = db.query(Paper).filter(Paper.id == paper_id).first()
     if not paper:
-        raise HTTPException(status_code=404, detail="Paper not found.")
+        raise HTTPException(status_code=404, detail=f"Paper with ID {paper_id} not found.")
 
     # Remove vector chunks from ChromaDB
     try:
         vector_store_service.delete_document(paper_id)
     except Exception as e:
-        print(f"Failed to delete ChromaDB vectors: {e}")
+        print(f"Warning: Failed to delete ChromaDB vectors for {paper_id}: {e}")
 
     # Remove file from disk
     if os.path.exists(paper.filepath):
         try:
             os.remove(paper.filepath)
         except Exception as e:
-            print(f"Failed to remove PDF file from disk: {e}")
+            print(f"Warning: Failed to remove PDF file from disk: {e}")
 
     db.delete(paper)
     db.commit()
-    return None
+    
+    return {
+        "success": True,
+        "message": f"Research paper {paper_id} and its indexed vectors were deleted successfully.",
+        "data": {"id": paper_id}
+    }

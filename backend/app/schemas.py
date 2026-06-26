@@ -1,7 +1,12 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, ConfigDict, Field
+
+class ApiResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[Any] = None
 
 class QueryMode(str, Enum):
     SUMMARY = "summary"
