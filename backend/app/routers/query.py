@@ -21,13 +21,14 @@ def execute_query(req: QueryRequest) -> Dict[str, Any]:
     """
     Unified RAG Question Answering Endpoint.
     Workflow: Question -> Retriever -> Groq -> Return answer with citations.
-    Stable response schema contract for Next.js frontend integration.
+    Enforces exact stable schema contract {answer, citations} with zero unexpected fields.
     """
     if not req.query or not req.query.strip():
         raise HTTPException(status_code=400, detail="Research question cannot be empty.")
 
     try:
         result = answer_question(req.query)
-        return result
+        validated = QueryResponse.model_validate(result)
+        return validated.model_dump()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Query execution error: {str(e)}")
