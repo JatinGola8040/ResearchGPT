@@ -13,6 +13,7 @@ from app.services.pdf.pdf_parser import parse_pdf
 from app.services.pdf.document_processor import process_document
 from app.services.vector.embedding_service import generate_chunk_embeddings
 from app.services.vector.vector_store import vector_store_service
+from app.services.ai.summary_service import generate_paper_summary
 
 router = APIRouter(prefix="/papers", tags=["papers"])
 
@@ -145,6 +146,21 @@ def upload_paper(
 @router.get("", response_model=List[PaperResponse], status_code=200)
 def list_papers(db: Session = Depends(get_db)):
     return db.query(Paper).order_by(Paper.created_at.desc()).all()
+
+@router.get("/{paper_id}/summary", status_code=200)
+def get_paper_summary(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
+    """
+    Feature 7: Retrieves representative chunks for a paper and generates structured AI summary.
+    """
+    paper = db.query(Paper).filter(Paper.id == paper_id).first()
+    if not paper:
+        raise HTTPException(status_code=404, detail=f"Paper with ID {paper_id} not found.")
+
+    try:
+        summary_data = generate_paper_summary(paper_id)
+        return summary_data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Summary generation error: {str(e)}")
 
 @router.delete("/{paper_id}", status_code=200)
 def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
