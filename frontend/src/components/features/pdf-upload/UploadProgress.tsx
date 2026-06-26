@@ -1,30 +1,17 @@
 import { X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-
-type UploadState = 'uploading' | 'completed' | 'failed';
-
-interface UploadItem {
-  id: string;
-  filename: string;
-  progress: number;
-  state: UploadState;
-  errorMessage?: string;
-}
-
-const mockUploads: UploadItem[] = [
-  { id: '1', filename: 'neuroscience_review_2024.pdf', progress: 45, state: 'uploading' },
-  { id: '2', filename: 'quantum_computing_basics.pdf', progress: 100, state: 'completed' },
-  { id: '3', filename: 'corrupted_file.pdf', progress: 12, state: 'failed', errorMessage: 'Network error. Please try again.' },
-];
+import { useUpload } from "./UploadContext";
 
 export function UploadProgress() {
-  if (mockUploads.length === 0) return null;
+  const { uploads, removeUpload } = useUpload();
+
+  if (uploads.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-2 w-full mt-4">
       <h4 className="text-xs font-semibold text-muted uppercase tracking-wider mb-1 px-1">
         Transfers
       </h4>
-      {mockUploads.map((item) => (
+      {uploads.map((item) => (
         <div key={item.id} className="p-3 bg-surface-elevated border border-border rounded-lg relative overflow-hidden group">
           {/* Progress bar background (subtle) */}
           {item.state === 'uploading' && (
@@ -44,7 +31,10 @@ export function UploadProgress() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium text-foreground truncate">{item.filename}</span>
-                <button className="text-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
+                <button 
+                  onClick={() => removeUpload(item.id)}
+                  className="text-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
