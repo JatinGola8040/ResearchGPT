@@ -32,13 +32,7 @@ export const api = {
   },
   
   getSummary: async (paperId: string) => {
-    const response = await fetch(`${API_URL}/summary`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ paper_id: paperId }),
-    });
+    const response = await fetch(`${API_URL}/papers/${paperId}/summary`);
     if (!response.ok) throw new Error(`Failed to fetch summary: ${response.status}`);
     return response.json();
   }
