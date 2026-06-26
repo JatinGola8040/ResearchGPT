@@ -2,7 +2,7 @@ import { FileText, Trash2, CheckCircle2, Loader2 } from "lucide-react";
 import { useUpload } from "./UploadContext";
 
 export function UploadedPapersList() {
-  const { papers, deletePaper, isLoadingPapers } = useUpload();
+  const { papers, deletePaper, isLoadingPapers, selectedPaperId, setSelectedPaperId } = useUpload();
 
   return (
     <div className="flex flex-col h-full">
@@ -20,10 +20,17 @@ export function UploadedPapersList() {
         </div>
       ) : (
         <div className="space-y-2 flex-1 overflow-y-auto pr-1">
-          {papers.map((paper) => (
+          {papers.map((paper) => {
+            const isSelected = selectedPaperId === paper.id;
+            return (
             <div 
               key={paper.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border hover:border-primary/50 hover:shadow-[0_0_10px_rgba(14,165,233,0.1)] transition-all group cursor-pointer"
+              onClick={() => setSelectedPaperId(paper.id)}
+              className={`flex items-center justify-between p-3 rounded-lg border transition-all group cursor-pointer ${
+                isSelected 
+                  ? 'bg-primary/5 border-primary shadow-[0_0_10px_rgba(14,165,233,0.15)]' 
+                  : 'bg-surface-elevated border-border hover:border-primary/50 hover:shadow-[0_0_10px_rgba(14,165,233,0.1)]'
+              }`}
             >
               <div className="flex items-start gap-3 overflow-hidden">
                 <div className={`mt-0.5 p-1.5 rounded-md ${paper.status === 'ready' || paper.status === 'completed' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'}`}>
@@ -61,7 +68,8 @@ export function UploadedPapersList() {
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

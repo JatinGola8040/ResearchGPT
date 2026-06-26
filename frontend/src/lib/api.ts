@@ -29,5 +29,18 @@ export const api = {
     });
     if (!response.ok) throw new Error(`API error: ${response.status}`);
     return response.json();
+  },
+  
+  getSummary: async (paperId: string) => {
+    const response = await fetch(`${API_URL}/summary`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_id: paperId }),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch summary: ${response.status}`);
+    return response.json();
   }
 };
+

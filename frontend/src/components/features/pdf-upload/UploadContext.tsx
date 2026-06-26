@@ -28,6 +28,8 @@ interface UploadContextType {
   refreshPapers: () => void;
   deletePaper: (id: string) => void;
   isLoadingPapers: boolean;
+  selectedPaperId: string | null;
+  setSelectedPaperId: (id: string | null) => void;
 }
 
 const UploadContext = createContext<UploadContextType | null>(null);
@@ -42,6 +44,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [isLoadingPapers, setIsLoadingPapers] = useState(false);
+  const [selectedPaperId, setSelectedPaperId] = useState<string | null>(null);
 
   const refreshPapers = useCallback(async () => {
     setIsLoadingPapers(true);
@@ -142,7 +145,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <UploadContext.Provider value={{ papers, uploads, uploadFile, removeUpload, refreshPapers, deletePaper, isLoadingPapers }}>
+    <UploadContext.Provider value={{ papers, uploads, uploadFile, removeUpload, refreshPapers, deletePaper, isLoadingPapers, selectedPaperId, setSelectedPaperId }}>
       {children}
     </UploadContext.Provider>
   );
