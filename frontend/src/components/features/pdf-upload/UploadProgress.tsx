@@ -1,3 +1,5 @@
+"use client";
+
 import { X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useUpload } from "./UploadContext";
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { FileText, GitCompare, Lightbulb, BookOpen, Quote } from "lucide-react";
 import { SummaryTab } from "../features/analysis-tabs/SummaryTab";

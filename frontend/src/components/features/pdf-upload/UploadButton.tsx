@@ -1,3 +1,5 @@
+"use client";
+
 import { Upload } from "lucide-react";
 import { useRef } from "react";
 import { useUpload } from "./UploadContext";
