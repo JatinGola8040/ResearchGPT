@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db, SessionLocal
 from app.models import Paper
-from app.schemas import PaperResponse
+from app.schemas import PaperResponse, PaperSummaryResponse
 from app.config import settings
 from app.services.pdf.pdf_parser import parse_pdf
 from app.services.pdf.document_processor import process_document
@@ -147,20 +147,40 @@ def upload_paper(
 def list_papers(db: Session = Depends(get_db)):
     return db.query(Paper).order_by(Paper.created_at.desc()).all()
 
-@router.get("/{paper_id}/summary", status_code=200)
-def get_paper_summary(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
+@router.get("/{paper_id}/summary", response_model=PaperSummaryResponse, status_code=200)
+def get_paper_summary(paper_id: str, db: Session = Depends(get_db)):
     """
     Feature 7: Retrieves representative chunks for a paper and generates structured AI summary.
+    Enforces consistent non-null JSON schema contract.
     """
     paper = db.query(Paper).filter(Paper.id == paper_id).first()
     if not paper:
-        raise HTTPException(status_code=404, detail=f"Paper with ID {paper_id} not found.")
+        raise HTTPException(status_code=404, detail="Paper not found")
 
     try:
         summary_data = generate_paper_summary(paper_id)
-        return summary_data
+        
+        contributions = summary_data.get("key_contributions", [])
+        if not isinstance(contributions, list):
+            contributions = [str(contributions)] if contributions else []
+        clean_contributions = [str(c) for c in contributions if c is not None]
+
+        payload = {
+            "paper_id": str(paper.id),
+            "paper_title": str(paper.title or ""),
+            "executive_summary": str(summary_data.get("executive_summary") or ""),
+            "key_contributions": clean_contributions,
+            "methodology": str(summary_data.get("methodology") or ""),
+            "results": str(summary_data.get("results") or ""),
+            "limitations": str(summary_data.get("limitations") or "")
+        }
+        validated = PaperSummaryResponse.model_validate(payload)
+        return validated.model_dump()
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Summary generation error: {str(e)}")
+        print(f"Summary generation failed for {paper_id}: {e}")
+        raise HTTPException(status_code=500, detail="Summary generation failed")
 
 @router.delete("/{paper_id}", status_code=200)
 def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:

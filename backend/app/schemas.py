@@ -15,6 +15,15 @@ class QueryMode(str, Enum):
     LITERATURE = "literature"
     CHAT = "chat"
 
+class PaperSummaryResponse(BaseModel):
+    paper_id: str
+    paper_title: str
+    executive_summary: str
+    key_contributions: List[str]
+    methodology: str
+    results: str
+    limitations: str
+
 class PaperResponse(BaseModel):
     id: str
     filename: str
