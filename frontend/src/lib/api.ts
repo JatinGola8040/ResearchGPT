@@ -35,6 +35,18 @@ export const api = {
     const response = await fetch(`${API_URL}/papers/${paperId}/summary`);
     if (!response.ok) throw new Error(`Failed to fetch summary: ${response.status}`);
     return response.json();
+  },
+  
+  comparePapers: async (paperIds: string[]) => {
+    const response = await fetch(`${API_URL}/papers/compare`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_ids: paperIds }),
+    });
+    if (!response.ok) throw new Error(`Failed to compare papers: ${response.status}`);
+    return response.json();
   }
 };
 

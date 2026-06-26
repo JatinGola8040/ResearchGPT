@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FileText, GitCompare, Lightbulb, BookOpen, Quote } from "lucide-react";
 import { SummaryTab } from "../features/analysis-tabs/SummaryTab";
+import { CompareTab } from "../features/analysis-tabs/CompareTab";
 
 export function RightAnalysisPanel() {
   const [activeTab, setActiveTab] = useState('summary');
@@ -19,6 +20,8 @@ export function RightAnalysisPanel() {
     switch (activeTab) {
       case 'summary':
         return <SummaryTab />;
+      case 'compare':
+        return <CompareTab />;
       default:
         return (
           <div className="card h-full flex flex-col items-center justify-center text-center p-6 border-dashed border-2 border-border bg-transparent">
