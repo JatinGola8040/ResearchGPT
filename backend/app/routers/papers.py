@@ -89,15 +89,11 @@ def process_paper_test(paper_id: str, db: Session = Depends(get_db)) -> Dict[str
         db.refresh(paper)
 
         return {
-            "success": True,
-            "message": "Paper synchronous processing and indexing completed.",
-            "data": {
-                "paper_id": paper.id,
-                "status": paper.status,
-                "title": paper.title,
-                "chunks_generated": len(processed.get("chunks", [])),
-                "chunks_indexed": chunks_stored
-            }
+            "paper_id": paper.id,
+            "status": paper.status,
+            "title": paper.title,
+            "chunks_generated": len(processed.get("chunks", [])),
+            "chunks_indexed": chunks_stored
         }
     except Exception as e:
         paper.status = "failed"
@@ -105,13 +101,13 @@ def process_paper_test(paper_id: str, db: Session = Depends(get_db)) -> Dict[str
         db.commit()
         raise HTTPException(status_code=500, detail=f"Indexing pipeline failed: {str(e)}")
 
-@router.post("/upload", status_code=201)
+@router.post("/upload", response_model=PaperResponse, status_code=201)
 def upload_paper(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     title: Optional[str] = Form(None),
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files (.pdf) are supported.")
 
@@ -144,20 +140,11 @@ def upload_paper(
     # Trigger background ingestion pipeline
     background_tasks.add_task(run_ingestion_pipeline_task, paper_id, file_path)
 
-    return {
-        "success": True,
-        "message": "PDF paper uploaded successfully and background indexing started.",
-        "data": PaperResponse.model_validate(new_paper).model_dump()
-    }
+    return new_paper
 
-@router.get("", status_code=200)
-def list_papers(db: Session = Depends(get_db)) -> Dict[str, Any]:
-    papers_db = db.query(Paper).order_by(Paper.created_at.desc()).all()
-    return {
-        "success": True,
-        "message": "Retrieved indexed research papers successfully.",
-        "data": [PaperResponse.model_validate(p).model_dump() for p in papers_db]
-    }
+@router.get("", response_model=List[PaperResponse], status_code=200)
+def list_papers(db: Session = Depends(get_db)):
+    return db.query(Paper).order_by(Paper.created_at.desc()).all()
 
 @router.delete("/{paper_id}", status_code=200)
 def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
@@ -182,7 +169,8 @@ def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]
     db.commit()
     
     return {
+        "id": paper_id,
+        "status": "deleted",
         "success": True,
-        "message": f"Research paper {paper_id} and its indexed vectors were deleted successfully.",
-        "data": {"id": paper_id}
+        "message": f"Research paper {paper_id} deleted successfully."
     }
