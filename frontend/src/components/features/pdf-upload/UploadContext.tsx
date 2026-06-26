@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import { api } from '../../../lib/api';
 
 type UploadState = 'uploading' | 'completed' | 'failed';
 
@@ -45,14 +46,8 @@ export function UploadProvider({ children }: { children: ReactNode }) {
   const refreshPapers = useCallback(async () => {
     setIsLoadingPapers(true);
     try {
-      const response = await fetch('/papers');
-      if (response.ok) {
-        const data = await response.json();
-        // Assume API returns an array or an object with a papers array
-        setPapers(data.papers || data);
-      } else {
-        console.error("Failed to fetch papers:", response.status);
-      }
+      const data = await api.getPapers();
+      setPapers(data.papers || data);
     } catch (error) {
       console.error("Error fetching papers:", error);
     } finally {
@@ -66,16 +61,12 @@ export function UploadProvider({ children }: { children: ReactNode }) {
 
   const deletePaper = async (id: string) => {
     try {
-      const response = await fetch(`/papers/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        refreshPapers();
-      } else {
-        console.error("Failed to delete paper:", response.status);
-      }
+      await api.deletePaper(id);
+      alert("Paper deleted successfully.");
+      refreshPapers();
     } catch (error) {
       console.error("Error deleting paper:", error);
+      alert("Failed to delete paper. Please try again.");
     }
   };
 
@@ -100,7 +91,7 @@ export function UploadProvider({ children }: { children: ReactNode }) {
     setUploads(prev => [newUpload, ...prev]);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/papers/upload');
+    xhr.open('POST', api.getUploadUrl());
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {

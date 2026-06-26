@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { TypingIndicator } from "./TypingIndicator";
 import { ChatInput } from "./ChatInput";
+import { api } from "../../../lib/api";
 
 interface Message {
   id: string;
@@ -33,19 +34,7 @@ export function AIChat() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query: content }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await api.queryChat(content);
       
       const newAssistantMsg: Message = { 
         id: (Date.now() + 1).toString(), 
