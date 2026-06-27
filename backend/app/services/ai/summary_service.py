@@ -2,7 +2,7 @@ import json
 from typing import Dict, Any, List
 from app.config import settings
 from app.services.ai.rag_service import get_groq_client
-from app.services.vector.retriever import retrieve_relevant_chunks
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
 
 SUMMARY_SYSTEM_PROMPT = """You are ResearchGPT, an expert academic research summarization assistant.
 Your goal is to generate a structured, comprehensive summary of the provided research paper fragments.
@@ -40,7 +40,8 @@ def generate_paper_summary(paper_id: str) -> Dict[str, Any]:
             "key_contributions": ["No indexed document context available."],
             "methodology": "Not explicitly mentioned.",
             "results": "Not explicitly mentioned.",
-            "limitations": "Not explicitly mentioned."
+            "limitations": "Not explicitly mentioned.",
+            "citations": []
         }
 
     context_text = "\n\n---\n\n".join([
@@ -77,5 +78,6 @@ def generate_paper_summary(paper_id: str) -> Dict[str, Any]:
         "key_contributions": contributions,
         "methodology": str(data.get("methodology", "Not specified.")),
         "results": str(data.get("results", "Not specified.")),
-        "limitations": str(data.get("limitations", "Not specified."))
+        "limitations": str(data.get("limitations", "Not specified.")),
+        "citations": format_citations(chunks)
     }

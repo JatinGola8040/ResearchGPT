@@ -7,8 +7,12 @@ import { ChatInput } from "./ChatInput";
 import { api } from "../../../lib/api";
 
 export interface Citation {
-  paper_title: string;
-  page: number;
+  paper_title?: string;
+  title?: string;
+  page?: number | string;
+  snippet?: string;
+  paper_id?: string;
+  [key: string]: any;
 }
 
 interface Message {
@@ -16,6 +20,8 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   citations?: Citation[];
+  isLoadingCitations?: boolean;
+  citationError?: string | null;
 }
 
 export function AIChat() {
@@ -35,29 +41,45 @@ export function AIChat() {
 
   const handleSendMessage = async (content: string) => {
     const newUserMsg: Message = { id: Date.now().toString(), role: 'user', content };
-    setMessages(prev => [...prev, newUserMsg]);
+    const tempAssistantId = (Date.now() + 1).toString();
+    const loadingAssistantMsg: Message = {
+      id: tempAssistantId,
+      role: 'assistant',
+      content: '',
+      isLoadingCitations: true
+    };
+    setMessages(prev => [...prev, newUserMsg, loadingAssistantMsg]);
     setIsTyping(true);
 
     try {
       const data = await api.queryChat(content);
       
-      const newAssistantMsg: Message = { 
-        id: (Date.now() + 1).toString(), 
-        role: 'assistant', 
-        // fallback fields just in case the backend response shape differs slightly
-        content: data.answer || data.response || data.message || "I couldn't process that request.",
-        citations: data.citations
-      };
-      
-      setMessages(prev => [...prev, newAssistantMsg]);
-    } catch (error) {
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === tempAssistantId) {
+          return {
+            id: tempAssistantId,
+            role: 'assistant',
+            content: data.answer || data.response || data.message || "I couldn't process that request.",
+            citations: data.citations || [],
+            isLoadingCitations: false
+          };
+        }
+        return msg;
+      }));
+    } catch (error: any) {
       console.error("Chat API Error:", error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "Sorry, I encountered an error while communicating with the server. Please check your connection and try again."
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === tempAssistantId) {
+          return {
+            id: tempAssistantId,
+            role: 'assistant',
+            content: "Sorry, I encountered an error while communicating with the server. Please check your connection and try again.",
+            citationError: error.message || "Failed to fetch AI response and citations.",
+            isLoadingCitations: false
+          };
+        }
+        return msg;
+      }));
     } finally {
       setIsTyping(false);
     }
@@ -74,6 +96,8 @@ export function AIChat() {
               role={msg.role} 
               content={msg.content} 
               citations={msg.citations} 
+              isLoadingCitations={msg.isLoadingCitations}
+              citationError={msg.citationError}
             />
           ))}
           {isTyping && <TypingIndicator />}

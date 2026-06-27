@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.database import Base, engine
-from app.routers import papers, query
+from app.routers import papers, query, export
 from app.services.vector.vector_store import vector_store_service
 from app.services.vector.retriever import retrieve_relevant_chunks
 
@@ -65,6 +65,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 # Register routers
 app.include_router(papers.router)
 app.include_router(query.router)
+app.include_router(export.router)
 
 @app.get("/")
 def root():

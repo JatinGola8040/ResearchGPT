@@ -2,7 +2,7 @@ import json
 from typing import Dict, Any, List
 from app.config import settings
 from app.services.ai.rag_service import get_groq_client, build_rag_prompt
-from app.services.vector.retriever import retrieve_relevant_chunks
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
 
 GAP_SYSTEM_PROMPT = """You are ResearchGPT, an expert academic research gap analysis assistant.
 Your goal is to analyze retrieved text fragments across multiple research papers to identify current research coverage, common themes, conflicting findings, research gaps, future opportunities, and potential questions.
@@ -73,5 +73,6 @@ def generate_gap_analysis(papers_meta: List[Dict[str, str]]) -> Dict[str, Any]:
         "conflicting_findings": _clean_list(data.get("conflicting_findings")),
         "research_gaps": _clean_list(data.get("research_gaps")),
         "future_research_opportunities": _clean_list(data.get("future_research_opportunities")),
-        "potential_research_questions": _clean_list(data.get("potential_research_questions"))
+        "potential_research_questions": _clean_list(data.get("potential_research_questions")),
+        "citations": format_citations(all_chunks)
     }

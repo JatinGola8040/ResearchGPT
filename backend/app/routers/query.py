@@ -1,23 +1,16 @@
-from typing import List, Dict, Any
+from typing import Dict, Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from app.schemas import QueryResponse
 from app.services.ai.rag_service import answer_question
 
 router = APIRouter(prefix="/query", tags=["query"])
 
-class QueryRequest(BaseModel):
+class QueryEndpointRequest(BaseModel):
     query: str = Field(..., description="User research question.", min_length=1)
 
-class CitationItem(BaseModel):
-    paper_title: str
-    page: int
-
-class QueryResponse(BaseModel):
-    answer: str
-    citations: List[CitationItem]
-
 @router.post("", response_model=QueryResponse, status_code=200)
-def execute_query(req: QueryRequest) -> Dict[str, Any]:
+def execute_query(req: QueryEndpointRequest) -> Dict[str, Any]:
     """
     Unified RAG Question Answering Endpoint.
     Workflow: Question -> Retriever -> Groq -> Return answer with citations.
@@ -28,6 +21,8 @@ def execute_query(req: QueryRequest) -> Dict[str, Any]:
 
     try:
         result = answer_question(req.query)
+        if not isinstance(result.get("citations"), list):
+            result["citations"] = []
         validated = QueryResponse.model_validate(result)
         return validated.model_dump()
     except Exception as e:

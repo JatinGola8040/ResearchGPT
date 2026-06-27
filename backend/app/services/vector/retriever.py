@@ -88,3 +88,33 @@ def retrieve_relevant_chunks(query: str, top_k: int = 5, filter_paper_id: Option
         })
 
     return retrieved_items
+
+def format_citations(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Formats retrieved chunks into unified citation format ensuring snippet length ~200 characters.
+    """
+    seen = set()
+    citations = []
+    for c in chunks:
+        pid = str(c.get("paper_id", "") or "")
+        title = str(c.get("paper_title", "") or "Untitled Paper")
+        try:
+            page = int(c.get("page", 1) or 1)
+        except (ValueError, TypeError):
+            page = 1
+        text = str(c.get("chunk_text", c.get("text", "")) or "").strip()
+        if not text or "No indexed document context available" in text:
+            continue
+        snippet = text[:200] + ("..." if len(text) > 200 else "")
+
+        key = (pid, page)
+        if key not in seen:
+            seen.add(key)
+            citations.append({
+                "paper_id": pid,
+                "paper_title": title,
+                "page": page,
+                "snippet": snippet
+            })
+    return citations
+

@@ -2,7 +2,7 @@ import json
 from typing import Dict, Any, List
 from app.config import settings
 from app.services.ai.rag_service import get_groq_client
-from app.services.vector.retriever import retrieve_relevant_chunks
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
 
 COMPARE_SYSTEM_PROMPT = """You are ResearchGPT, an expert academic comparative analysis assistant.
 Your goal is to generate a comprehensive comparative synthesis across multiple research papers based strictly on the retrieved text fragments.
@@ -29,10 +29,12 @@ def generate_papers_comparison(papers_meta: List[Dict[str, str]]) -> Dict[str, A
     context_blocks = []
     query = "abstract research objective goals methodology architecture dataset benchmarks evaluation results strengths limitations conclusion"
 
+    all_chunks = []
     for p in papers_meta:
         pid = p["paper_id"]
         title = p["paper_title"]
         chunks = retrieve_relevant_chunks(query=query, top_k=8, filter_paper_id=pid)
+        all_chunks.extend(chunks)
 
         paper_text = "\n".join([
             f"[Page {c.get('page', 1)}]\n{c.get('chunk_text', c.get('text', ''))}"
@@ -76,5 +78,6 @@ def generate_papers_comparison(papers_meta: List[Dict[str, str]]) -> Dict[str, A
         "strengths": str(data.get("strengths") or "Not specified."),
         "limitations": str(data.get("limitations") or "Not specified."),
         "key_differences": clean_differences,
-        "overall_conclusion": str(data.get("overall_conclusion") or "Not specified.")
+        "overall_conclusion": str(data.get("overall_conclusion") or "Not specified."),
+        "citations": format_citations(all_chunks)
     }

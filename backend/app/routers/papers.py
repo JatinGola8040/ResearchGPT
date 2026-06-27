@@ -171,6 +171,10 @@ def get_paper_summary(paper_id: str, db: Session = Depends(get_db)):
             contributions = [str(contributions)] if contributions else []
         clean_contributions = [str(c) for c in contributions if c is not None]
 
+        citations = summary_data.get("citations", [])
+        if not isinstance(citations, list):
+            citations = []
+
         payload = {
             "paper_id": str(paper.id),
             "paper_title": str(paper.title or ""),
@@ -178,7 +182,8 @@ def get_paper_summary(paper_id: str, db: Session = Depends(get_db)):
             "key_contributions": clean_contributions,
             "methodology": str(summary_data.get("methodology") or ""),
             "results": str(summary_data.get("results") or ""),
-            "limitations": str(summary_data.get("limitations") or "")
+            "limitations": str(summary_data.get("limitations") or ""),
+            "citations": citations
         }
         validated = PaperSummaryResponse.model_validate(payload)
         return validated.model_dump()
@@ -205,9 +210,13 @@ def compare_papers(req: ComparePapersRequest, db: Session = Depends(get_db)):
 
     try:
         comparison_data = generate_papers_comparison(papers_meta)
+        citations = comparison_data.pop("citations", [])
+        if not isinstance(citations, list):
+            citations = []
         payload = {
             "papers": papers_meta,
-            "comparison": comparison_data
+            "comparison": comparison_data,
+            "citations": citations
         }
         validated = ComparePapersResponse.model_validate(payload)
         return validated.model_dump()
@@ -234,9 +243,13 @@ def analyze_research_gaps(req: GapAnalysisRequest, db: Session = Depends(get_db)
 
     try:
         analysis_data = generate_gap_analysis(papers_meta)
+        citations = analysis_data.pop("citations", [])
+        if not isinstance(citations, list):
+            citations = []
         payload = {
             "papers": papers_meta,
-            "analysis": analysis_data
+            "analysis": analysis_data,
+            "citations": citations
         }
         validated = GapAnalysisResponse.model_validate(payload)
         return validated.model_dump()
@@ -263,6 +276,8 @@ def create_literature_review(req: LiteratureReviewRequest, db: Session = Depends
 
     try:
         review_data = generate_literature_review(papers_meta)
+        if not isinstance(review_data.get("citations"), list):
+            review_data["citations"] = []
         validated = LiteratureReviewResponse.model_validate(review_data)
         return validated.model_dump()
     except HTTPException:

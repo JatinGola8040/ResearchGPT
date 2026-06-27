@@ -28,7 +28,10 @@ export function LiteratureReviewTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [exportMessage, setExportMessage] = useState<string | null>(null);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportSuccess, setExportSuccess] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
   
   // Track collapsible states
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -67,7 +70,8 @@ export function LiteratureReviewTab() {
     setIsLoading(true);
     setError(null);
     setReviewData(null);
-    setExportMessage(null);
+    setExportSuccess(null);
+    setExportError(null);
     
     try {
       const data = await api.generateLiteratureReview(selectedIds);
@@ -131,9 +135,37 @@ export function LiteratureReviewTab() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleExport = () => {
-    setExportMessage("Export feature coming soon.");
-    setTimeout(() => setExportMessage(null), 3000);
+  const handleExportOption = async (type: 'pdf' | 'docx') => {
+    setShowExportDropdown(false);
+    setIsExporting(true);
+    setExportSuccess(null);
+    setExportError(null);
+
+    try {
+      if (!reviewData) return;
+      const blob = await api.exportReport({
+        type,
+        content: reviewData
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `literature_review_${Date.now()}.${type}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      setExportSuccess(`Successfully exported as ${type.toUpperCase()}!`);
+      setTimeout(() => setExportSuccess(null), 4000);
+    } catch (err: any) {
+      console.error("Export failed:", err);
+      setExportError(err.message || "Failed to generate export file. Please try again.");
+      setTimeout(() => setExportError(null), 5000);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const ExpandableCard = ({ title, contentKey, content }: { title: string, contentKey: string, content?: any }) => {
@@ -287,7 +319,7 @@ export function LiteratureReviewTab() {
 
       {/* Action Buttons */}
       {reviewData && !isLoading && (
-        <div className="flex items-center justify-between gap-2 pt-2">
+        <div className="flex items-center justify-between gap-2 pt-2 relative">
           <button
             onClick={handleCopy}
             className="flex-1 py-2 px-3 bg-surface-elevated hover:bg-surface border border-border rounded-lg text-xs font-medium text-foreground flex items-center justify-center gap-1.5 transition-colors"
@@ -296,19 +328,60 @@ export function LiteratureReviewTab() {
             {copied ? "Copied!" : "Copy to Clipboard"}
           </button>
           
-          <button
-            onClick={handleExport}
-            className="flex-1 py-2 px-3 bg-surface-elevated hover:bg-surface border border-border rounded-lg text-xs font-medium text-foreground flex items-center justify-center gap-1.5 transition-colors relative"
-          >
-            <Download className="w-3.5 h-3.5 text-muted" />
-            Export
-          </button>
+          <div className="flex-1 relative">
+            <button
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              disabled={isExporting}
+              className="w-full py-2 px-3 bg-surface-elevated hover:bg-surface border border-border rounded-lg text-xs font-medium text-foreground flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {isExporting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                  <span>Exporting...</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-3.5 h-3.5 text-muted" />
+                  <span>Export</span>
+                </>
+              )}
+            </button>
+
+            {showExportDropdown && !isExporting && (
+              <div className="absolute right-0 bottom-full mb-1 w-36 bg-surface-elevated border border-border rounded-lg shadow-lg overflow-hidden z-20">
+                <button
+                  onClick={() => handleExportOption('pdf')}
+                  className="w-full px-3 py-2 text-left text-xs hover:bg-primary/10 flex items-center gap-2 text-foreground border-b border-border/50 cursor-pointer"
+                >
+                  <span className="font-semibold text-red-400">PDF</span>
+                  <span>Document (.pdf)</span>
+                </button>
+                <button
+                  onClick={() => handleExportOption('docx')}
+                  className="w-full px-3 py-2 text-left text-xs hover:bg-primary/10 flex items-center gap-2 text-foreground cursor-pointer"
+                >
+                  <span className="font-semibold text-blue-400">DOCX</span>
+                  <span>Word (.docx)</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {exportMessage && (
-        <div className="p-2 text-center text-xs text-primary bg-primary/10 border border-primary/20 rounded-md">
-          {exportMessage}
+      {/* Success Toast */}
+      {exportSuccess && (
+        <div className="p-2.5 text-center text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-1">
+          <Check className="w-3.5 h-3.5 shrink-0" />
+          <span>{exportSuccess}</span>
+        </div>
+      )}
+
+      {/* Error Toast */}
+      {exportError && (
+        <div className="p-2.5 text-center text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-md flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-1">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+          <span>{exportError}</span>
         </div>
       )}
 

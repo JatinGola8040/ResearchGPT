@@ -2,7 +2,7 @@ import json
 from typing import Dict, Any, List
 from app.config import settings
 from app.services.ai.rag_service import get_groq_client, build_rag_prompt
-from app.services.vector.retriever import retrieve_relevant_chunks
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
 
 LITERATURE_SYSTEM_PROMPT = """You are ResearchGPT, an expert academic literature review assistant.
 Your goal is to synthesize retrieved text fragments across multiple research papers into a comprehensive, structured academic literature review.
@@ -100,5 +100,6 @@ def generate_literature_review(papers_meta: List[Dict[str, str]]) -> Dict[str, A
         "research_gaps": str(data.get("research_gaps") or "Not specified."),
         "future_scope": str(data.get("future_scope") or "Not specified."),
         "conclusion": str(data.get("conclusion") or "Not specified."),
-        "references": _clean_references(data.get("references"), papers_meta)
+        "references": _clean_references(data.get("references"), papers_meta),
+        "citations": format_citations(all_chunks)
     }

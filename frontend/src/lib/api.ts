@@ -71,6 +71,20 @@ export const api = {
     });
     if (!response.ok) throw new Error(`Failed to generate literature review: ${response.status}`);
     return response.json();
+  },
+
+  exportReport: async (payload: { type: 'pdf' | 'docx'; content: any }) => {
+    const response = await fetch(`${API_URL}/export`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error(`Export API error (${response.status})`);
+    }
+    return response.blob();
   }
 };
 

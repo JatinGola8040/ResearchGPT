@@ -1,7 +1,7 @@
 from typing import List, Dict, Any, Optional
 from groq import Groq
 from app.config import settings
-from app.services.vector.retriever import retrieve_relevant_chunks
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
 
 # Exact System Prompt requested
 RAG_SYSTEM_PROMPT = (
@@ -64,21 +64,8 @@ def answer_question(question: str, filter_paper_id: Optional[str] = None) -> Dic
             "citations": []
         }
 
-    # Extract deduplicated citations
-    seen_citations = set()
-    citations_list: List[Dict[str, Any]] = []
-
-    for c in chunks:
-        title = c.get("paper_title", "")
-        page = c.get("page", 1)
-
-        cite_key = (str(title), int(page))
-        if cite_key not in seen_citations:
-            seen_citations.add(cite_key)
-            citations_list.append({
-                "paper_title": str(title),
-                "page": int(page)
-            })
+    # Extract unified citations
+    citations_list = format_citations(chunks)
 
     # Step 3: Build grounded prompt using separate function
     user_prompt_content = build_rag_prompt(chunks, question)

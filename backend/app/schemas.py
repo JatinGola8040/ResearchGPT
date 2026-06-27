@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, ConfigDict, Field
 
 class ApiResponse(BaseModel):
@@ -15,6 +15,12 @@ class QueryMode(str, Enum):
     LITERATURE = "literature"
     CHAT = "chat"
 
+class Citation(BaseModel):
+    paper_id: str
+    paper_title: str
+    page: int
+    snippet: str
+
 class PaperSummaryResponse(BaseModel):
     paper_id: str
     paper_title: str
@@ -23,6 +29,7 @@ class PaperSummaryResponse(BaseModel):
     methodology: str
     results: str
     limitations: str
+    citations: List[Citation] = Field(default_factory=list)
 
 class ComparePapersRequest(BaseModel):
     paper_ids: List[str] = Field(..., min_length=2, max_length=5)
@@ -43,6 +50,7 @@ class ComparisonContent(BaseModel):
 class ComparePapersResponse(BaseModel):
     papers: List[PaperHeaderItem]
     comparison: ComparisonContent
+    citations: List[Citation] = Field(default_factory=list)
 
 class GapAnalysisRequest(BaseModel):
     paper_ids: List[str] = Field(..., min_length=2, max_length=5)
@@ -58,6 +66,7 @@ class GapAnalysisContent(BaseModel):
 class GapAnalysisResponse(BaseModel):
     papers: List[PaperHeaderItem]
     analysis: GapAnalysisContent
+    citations: List[Citation] = Field(default_factory=list)
 
 class LiteratureReviewRequest(BaseModel):
     paper_ids: List[str] = Field(..., min_length=2, max_length=10)
@@ -79,7 +88,7 @@ class LiteratureReviewResponse(BaseModel):
     future_scope: str
     conclusion: str
     references: List[LiteratureReferenceItem]
-
+    citations: List[Citation] = Field(default_factory=list)
 
 class PaperResponse(BaseModel):
     id: str
@@ -100,12 +109,11 @@ class QueryRequest(BaseModel):
     paper_ids: List[str]
     mode: QueryMode
 
-class Citation(BaseModel):
-    paper_id: str
-    page: int
-    snippet: str
-
 class QueryResponse(BaseModel):
-    mode: QueryMode
+    mode: Optional[QueryMode] = None
     answer: str
     citations: List[Citation] = Field(default_factory=list)
+
+class ExportRequest(BaseModel):
+    type: str = Field(..., description="Export file type: pdf or docx")
+    content: Dict[str, Any] = Field(..., description="The AI response dictionary to export.")
