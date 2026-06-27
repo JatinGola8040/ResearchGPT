@@ -18,6 +18,11 @@ export interface Paper {
   title: string;
   status: 'ready' | 'processing' | string;
   uploaded_at?: string;
+  author?: string;
+  authors?: string;
+  year?: string | number;
+  abstract?: string;
+  [key: string]: unknown;
 }
 
 interface UploadContextType {

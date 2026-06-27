@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUpload } from "../pdf-upload/UploadContext";
 import { api } from "../../../lib/api";
-import { Loader2, AlertCircle, BookOpen, ChevronDown, ChevronUp, Copy, Check, Download } from "lucide-react";
+import { Loader2, AlertCircle, BookOpen, ChevronDown, ChevronUp, Copy, Check, Download, Sparkles, CheckSquare, Square } from "lucide-react";
 
 interface LiteratureReviewData {
   title?: string;
@@ -17,8 +17,96 @@ interface LiteratureReviewData {
   research_gaps?: string | string[];
   future_scope?: string | string[];
   conclusion?: string | string[];
-  references?: any[];
-  [key: string]: any;
+  references?: unknown[];
+  [key: string]: unknown;
+}
+
+interface ExpandableReviewSectionProps {
+  title: string;
+  contentKey: string;
+  content?: unknown;
+  isExpanded: boolean;
+  onToggle: (key: string) => void;
+}
+
+function ExpandableReviewSection({ title, contentKey, content, isExpanded, onToggle }: ExpandableReviewSectionProps) {
+  const hasContent = content !== undefined && content !== null && (!Array.isArray(content) || content.length > 0);
+  const displayContent = hasContent ? content : "No specific details identified.";
+  
+  const renderContent = () => {
+    if (contentKey === "references" || (Array.isArray(displayContent) && displayContent.length > 0 && typeof displayContent[0] === 'object' && displayContent[0] !== null)) {
+      if (!Array.isArray(displayContent)) {
+        const text = typeof displayContent === 'object' && displayContent !== null ? JSON.stringify(displayContent) : String(displayContent);
+        return <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans">{text}</p>;
+      }
+      return (
+        <div className="space-y-2.5">
+          {displayContent.map((ref: unknown, idx: number) => {
+            if (typeof ref !== 'object' || ref === null) {
+              return (
+                <div key={idx} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] text-xs text-zinc-300 font-mono">
+                  {String(ref)}
+                </div>
+              );
+            }
+            const refObj = ref as { paper_title?: string; title?: string; citation?: string };
+            return (
+              <div key={idx} className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-1">
+                <div className="font-semibold text-xs text-white flex items-center gap-2">
+                  <span>📄</span>
+                  <span>{String(refObj.paper_title || refObj.title || "Untitled Paper")}</span>
+                </div>
+                {Boolean(refObj.citation) && (
+                  <div className="text-[11px] text-zinc-400 font-mono leading-relaxed pl-6 italic">
+                    {String(refObj.citation)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (Array.isArray(displayContent)) {
+      return (
+        <ul className="space-y-2">
+          {displayContent.map((item: unknown, idx: number) => {
+            const text = typeof item === 'object' && item !== null ? ((item as Record<string, unknown>).paper_title ? `${(item as Record<string, unknown>).paper_title}: ${(item as Record<string, unknown>).citation || ''}` : JSON.stringify(item)) : String(item);
+            return (
+              <li key={idx} className="text-xs text-zinc-300 leading-relaxed flex items-start gap-2.5 bg-white/[0.02] p-2.5 rounded-lg border border-white/[0.03]">
+                <span className="text-cyan-400 font-mono font-bold shrink-0">•</span>
+                <span>{text}</span>
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    const text = typeof displayContent === 'object' && displayContent !== null ? JSON.stringify(displayContent, null, 2) : String(displayContent);
+    return <p className="text-xs text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans">{text}</p>;
+  };
+
+  return (
+    <div className="rounded-xl bg-[#131418] border border-white/[0.07] overflow-hidden transition-all duration-200 hover:border-white/[0.15]">
+      <button 
+        onClick={() => onToggle(contentKey)}
+        className="w-full flex items-center justify-between p-4 text-left bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer"
+      >
+        <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          {title}
+        </span>
+        {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+      </button>
+      {isExpanded && (
+        <div className="p-4 border-t border-white/[0.06] bg-black/20">
+          {renderContent()}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function LiteratureReviewTab() {
@@ -33,7 +121,6 @@ export function LiteratureReviewTab() {
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   
-  // Track collapsible states
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     title: true,
     introduction: true,
@@ -58,7 +145,7 @@ export function LiteratureReviewTab() {
       if (prev.includes(id)) {
         return prev.filter(p => p !== id);
       } else {
-        if (prev.length >= 10) return prev; // max 10 enforcement
+        if (prev.length >= 10) return prev;
         return [...prev, id];
       }
     });
@@ -92,7 +179,7 @@ export function LiteratureReviewTab() {
       });
     } catch (err) {
       console.error("Failed to generate literature review:", err);
-      setError("Failed to generate literature review. Please try again.");
+      setError("Failed to generate literature synthesis. Please retry.");
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +208,7 @@ export function LiteratureReviewTab() {
         if (!val) return null;
         let formattedVal = val;
         if (Array.isArray(val)) {
-          formattedVal = val.map(v => typeof v === 'object' && v !== null ? (v.paper_title ? `${v.paper_title}: ${v.citation || ''}` : JSON.stringify(v)) : `• ${v}`).join('\n');
+          formattedVal = val.map(v => typeof v === 'object' && v !== null ? ((v as Record<string, unknown>).paper_title ? `${(v as Record<string, unknown>).paper_title}: ${(v as Record<string, unknown>).citation || ''}` : JSON.stringify(v)) : `• ${v}`).join('\n');
         } else if (typeof val === 'object' && val !== null) {
           formattedVal = JSON.stringify(val);
         }
@@ -157,102 +244,25 @@ export function LiteratureReviewTab() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      setExportSuccess(`Successfully exported as ${type.toUpperCase()}!`);
+      setExportSuccess(`Successfully downloaded studio ${type.toUpperCase()} report!`);
       setTimeout(() => setExportSuccess(null), 4000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to generate export file. Please retry.";
       console.error("Export failed:", err);
-      setExportError(err.message || "Failed to generate export file. Please try again.");
+      setExportError(errorMsg);
       setTimeout(() => setExportError(null), 5000);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const ExpandableCard = ({ title, contentKey, content }: { title: string, contentKey: string, content?: any }) => {
-    const isExpanded = expandedSections[contentKey];
-    const hasContent = content && (!Array.isArray(content) || content.length > 0);
-    const displayContent = hasContent ? content : "No specific details identified.";
-    
-    const renderContent = () => {
-      if (contentKey === "references" || (Array.isArray(displayContent) && displayContent.length > 0 && typeof displayContent[0] === 'object' && displayContent[0] !== null)) {
-        if (!Array.isArray(displayContent)) {
-          const text = typeof displayContent === 'object' && displayContent !== null ? JSON.stringify(displayContent) : String(displayContent);
-          return <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{text}</p>;
-        }
-        return (
-          <div className="space-y-2.5">
-            {displayContent.map((ref: any, idx: number) => {
-              if (typeof ref !== 'object' || ref === null) {
-                return (
-                  <div key={idx} className="p-3 rounded-lg bg-surface border border-border text-sm text-muted">
-                    {String(ref)}
-                  </div>
-                );
-              }
-              return (
-                <div key={idx} className="p-3 rounded-lg bg-surface border border-border space-y-1">
-                  <div className="font-medium text-sm text-foreground flex items-center gap-2">
-                    <span>📄</span>
-                    <span>{ref.paper_title || ref.title || "Untitled Paper"}</span>
-                  </div>
-                  {ref.citation && (
-                    <div className="text-xs text-muted font-mono leading-relaxed pl-6">
-                      {ref.citation}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        );
-      }
-
-      if (Array.isArray(displayContent)) {
-        return (
-          <ul className="space-y-1.5">
-            {displayContent.map((item: any, idx: number) => {
-              const text = typeof item === 'object' && item !== null ? (item.paper_title ? `${item.paper_title}: ${item.citation || ''}` : JSON.stringify(item)) : String(item);
-              return (
-                <li key={idx} className="text-sm text-muted leading-relaxed flex items-start gap-2">
-                  <span className="text-primary font-bold">•</span>
-                  <span>{text}</span>
-                </li>
-              );
-            })}
-          </ul>
-        );
-      }
-
-      const text = typeof displayContent === 'object' && displayContent !== null ? JSON.stringify(displayContent, null, 2) : String(displayContent);
-      return <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{text}</p>;
-    };
-
-    return (
-      <div className="card bg-surface-elevated border-border overflow-hidden">
-        <button 
-          onClick={() => toggleSection(contentKey)}
-          className="w-full flex items-center justify-between p-4 text-left hover:bg-surface transition-colors"
-        >
-          <h3 className="text-sm font-semibold text-primary">{title}</h3>
-          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted" /> : <ChevronDown className="w-4 h-4 text-muted" />}
-        </button>
-        {isExpanded && (
-          <div className="p-4 pt-3 border-t border-border/50">
-            {renderContent()}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Early return if not enough papers are uploaded
   if (papers.length < 2) {
     return (
-      <div className="card h-full flex flex-col items-center justify-center text-center p-6 border-dashed border-2 border-border bg-transparent">
-        <BookOpen className="w-10 h-10 text-muted mb-4 opacity-50" />
-        <h3 className="text-sm font-medium text-foreground mb-2">Literature Review View</h3>
-        <p className="text-xs text-muted">
-          Upload at least 2 papers to generate a comprehensive literature review.
+      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
+        <BookOpen className="w-8 h-8 text-zinc-600 mb-3" />
+        <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1">Literature Synthesis Studio</h3>
+        <p className="text-xs text-zinc-500 max-w-xs">
+          Index at least 2 manuscripts to author formal literature reviews with references.
         </p>
       </div>
     );
@@ -262,106 +272,115 @@ export function LiteratureReviewTab() {
     <div className="space-y-6 pb-6">
       {/* Paper Selection UI */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold text-muted uppercase tracking-wider">
-          Select Papers (2-10)
-        </h3>
-        <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-          {papers.map(paper => (
-            <label 
-              key={paper.id} 
-              className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedIds.includes(paper.id) 
-                  ? 'bg-primary/5 border-primary/50' 
-                  : 'bg-surface border-border hover:border-primary/30'
-              }`}
-            >
-              <input 
-                type="checkbox" 
-                className="mt-0.5 accent-primary"
-                checked={selectedIds.includes(paper.id)}
-                onChange={() => handleCheckboxChange(paper.id)}
-                disabled={!selectedIds.includes(paper.id) && selectedIds.length >= 10}
-              />
-              <span className="text-sm text-foreground line-clamp-2 leading-tight">{paper.title}</span>
-            </label>
-          ))}
+        <div className="flex items-center justify-between">
+          <h3 className="text-[11px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+            SELECT REPOSITORY MANUSCRIPTS (2-10)
+          </h3>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            {selectedIds.length} SELECTED
+          </span>
+        </div>
+
+        <div className="space-y-2 max-h-52 overflow-y-auto no-scrollbar pr-1">
+          {papers.map(paper => {
+            const isSelected = selectedIds.includes(paper.id);
+            const isDisabled = !isSelected && selectedIds.length >= 10;
+            return (
+              <div 
+                key={paper.id} 
+                onClick={() => !isDisabled && handleCheckboxChange(paper.id)}
+                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                  isSelected 
+                    ? 'bg-cyan-500/15 border-cyan-400/60 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-white' 
+                    : isDisabled
+                    ? 'bg-[#131418]/40 border-white/[0.04] opacity-50 cursor-not-allowed text-zinc-500'
+                    : 'bg-[#131418] border-white/[0.07] hover:border-white/20 text-zinc-300 hover:text-white'
+                }`}
+              >
+                <div className="mt-0.5 text-cyan-400 shrink-0">
+                  {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-zinc-600" />}
+                </div>
+                <span className="text-xs font-medium line-clamp-2 leading-snug">{paper.title}</span>
+              </div>
+            );
+          })}
         </div>
         
         <button 
           onClick={handleGenerate}
           disabled={selectedIds.length < 2 || selectedIds.length > 10 || isLoading}
-          className="w-full py-2.5 bg-primary text-primary-foreground font-medium rounded-lg text-sm disabled:opacity-50 transition-opacity flex items-center justify-center gap-2"
+          className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 disabled:opacity-40 disabled:hover:from-cyan-500 disabled:hover:to-purple-600 text-white font-mono font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(56,189,248,0.25)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] cursor-pointer disabled:cursor-not-allowed disabled:shadow-none"
         >
           {isLoading ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Generating Review...</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> SYNTHESIZING LITERATURE REVIEW...</>
           ) : (
-            <><BookOpen className="w-4 h-4" /> Generate Literature Review</>
+            <><BookOpen className="w-4 h-4" /> GENERATE LITERATURE REVIEW</>
           )}
         </button>
       </div>
 
       {/* Loading & Error States */}
       {error && (
-        <div className="flex flex-col items-center justify-center space-y-3 p-4 text-center border border-red-500/20 bg-red-500/5 rounded-lg">
-          <AlertCircle className="w-8 h-8 text-red-400" />
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center border border-red-500/30 bg-red-500/10 rounded-xl">
+          <AlertCircle className="w-6 h-6 text-red-400" />
+          <p className="text-xs font-mono text-red-400">{error}</p>
         </div>
       )}
 
       {!reviewData && !isLoading && !error && (
-        <div className="card flex flex-col items-center justify-center text-center p-6 border-dashed border-2 border-border bg-transparent mt-4">
-          <BookOpen className="w-8 h-8 text-muted mb-3 opacity-30" />
-          <p className="text-xs text-muted">
-            Select 2 to 10 papers and click generate to synthesize literature review.
+        <div className="rounded-xl flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.08] bg-black/20">
+          <BookOpen className="w-8 h-8 text-zinc-600 mb-2" />
+          <p className="text-xs text-zinc-500 font-mono">
+            Select 2 to 10 sources above to generate structured literature reviews.
           </p>
         </div>
       )}
 
       {/* Action Buttons */}
       {reviewData && !isLoading && (
-        <div className="flex items-center justify-between gap-2 pt-2 relative">
+        <div className="flex items-center justify-between gap-3 pt-2 relative">
           <button
             onClick={handleCopy}
-            className="flex-1 py-2 px-3 bg-surface-elevated hover:bg-surface border border-border rounded-lg text-xs font-medium text-foreground flex items-center justify-center gap-1.5 transition-colors"
+            className="flex-1 py-2.5 px-4 bg-[#131418] hover:bg-white/[0.06] border border-white/[0.1] rounded-xl text-xs font-mono text-zinc-300 hover:text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-muted" />}
-            {copied ? "Copied!" : "Copy to Clipboard"}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-cyan-400" />}
+            {copied ? <span className="text-emerald-400 font-bold">COPIED MARKDOWN!</span> : "COPY TO CLIPBOARD"}
           </button>
           
           <div className="flex-1 relative">
             <button
               onClick={() => setShowExportDropdown(!showExportDropdown)}
               disabled={isExporting}
-              className="w-full py-2 px-3 bg-surface-elevated hover:bg-surface border border-border rounded-lg text-xs font-medium text-foreground flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 px-4 bg-[#131418] hover:bg-white/[0.06] border border-white/[0.1] rounded-xl text-xs font-mono text-zinc-300 hover:text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-md"
             >
               {isExporting ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                  <span>Exporting...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                  <span>EXPORTING...</span>
                 </>
               ) : (
                 <>
-                  <Download className="w-3.5 h-3.5 text-muted" />
-                  <span>Export</span>
+                  <Download className="w-3.5 h-3.5 text-purple-400" />
+                  <span>EXPORT REPORT</span>
                 </>
               )}
             </button>
 
             {showExportDropdown && !isExporting && (
-              <div className="absolute right-0 bottom-full mb-1 w-36 bg-surface-elevated border border-border rounded-lg shadow-lg overflow-hidden z-20">
+              <div className="absolute right-0 bottom-full mb-2 w-44 bg-[#131418] border border-white/[0.15] rounded-xl shadow-2xl overflow-hidden z-30">
                 <button
                   onClick={() => handleExportOption('pdf')}
-                  className="w-full px-3 py-2 text-left text-xs hover:bg-primary/10 flex items-center gap-2 text-foreground border-b border-border/50 cursor-pointer"
+                  className="w-full px-4 py-3 text-left text-xs hover:bg-cyan-500/15 flex items-center gap-2.5 text-zinc-200 border-b border-white/[0.06] transition-colors cursor-pointer"
                 >
-                  <span className="font-semibold text-red-400">PDF</span>
-                  <span>Document (.pdf)</span>
+                  <span className="font-mono font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded text-[10px]">PDF</span>
+                  <span className="font-sans font-medium">Document (.pdf)</span>
                 </button>
                 <button
                   onClick={() => handleExportOption('docx')}
-                  className="w-full px-3 py-2 text-left text-xs hover:bg-primary/10 flex items-center gap-2 text-foreground cursor-pointer"
+                  className="w-full px-4 py-3 text-left text-xs hover:bg-purple-500/15 flex items-center gap-2.5 text-zinc-200 transition-colors cursor-pointer"
                 >
-                  <span className="font-semibold text-blue-400">DOCX</span>
-                  <span>Word (.docx)</span>
+                  <span className="font-mono font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded text-[10px]">DOCX</span>
+                  <span className="font-sans font-medium">Word (.docx)</span>
                 </button>
               </div>
             )}
@@ -371,35 +390,35 @@ export function LiteratureReviewTab() {
 
       {/* Success Toast */}
       {exportSuccess && (
-        <div className="p-2.5 text-center text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-md flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-1">
-          <Check className="w-3.5 h-3.5 shrink-0" />
+        <div className="p-3 text-center text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center gap-2 shadow-lg">
+          <Check className="w-4 h-4 shrink-0 text-emerald-400" />
           <span>{exportSuccess}</span>
         </div>
       )}
 
       {/* Error Toast */}
       {exportError && (
-        <div className="p-2.5 text-center text-xs font-medium text-red-400 bg-red-500/10 border border-red-500/20 rounded-md flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-1">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+        <div className="p-3 text-center text-xs font-mono font-medium text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center justify-center gap-2 shadow-lg">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
           <span>{exportError}</span>
         </div>
       )}
 
-      {/* Results UI with Collapsible Cards */}
+      {/* Results UI */}
       {reviewData && !isLoading && (
-        <div className="space-y-3 mt-2">
-          <ExpandableCard title="Title" contentKey="title" content={reviewData.title} />
-          <ExpandableCard title="Introduction" contentKey="introduction" content={reviewData.introduction} />
-          <ExpandableCard title="Research Objectives" contentKey="objectives" content={reviewData.research_objectives} />
-          <ExpandableCard title="Related Work" contentKey="related" content={reviewData.related_work} />
-          <ExpandableCard title="Methodology Comparison" contentKey="methodology" content={reviewData.methodology_comparison} />
-          <ExpandableCard title="Datasets Used" contentKey="datasets" content={reviewData.datasets_used} />
-          <ExpandableCard title="Key Findings" contentKey="findings" content={reviewData.key_findings} />
-          <ExpandableCard title="Research Trends" contentKey="trends" content={reviewData.research_trends} />
-          <ExpandableCard title="Research Gaps" contentKey="gaps" content={reviewData.research_gaps} />
-          <ExpandableCard title="Future Scope" contentKey="scope" content={reviewData.future_scope} />
-          <ExpandableCard title="Conclusion" contentKey="conclusion" content={reviewData.conclusion} />
-          <ExpandableCard title="References" contentKey="references" content={reviewData.references} />
+        <div className="space-y-3 pt-2">
+          <ExpandableReviewSection title="Review Title" contentKey="title" content={reviewData.title} isExpanded={!!expandedSections.title} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Introduction & Context" contentKey="introduction" content={reviewData.introduction} isExpanded={!!expandedSections.introduction} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Synthesized Research Objectives" contentKey="objectives" content={reviewData.research_objectives} isExpanded={!!expandedSections.objectives} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Related Work Survey" contentKey="related" content={reviewData.related_work} isExpanded={!!expandedSections.related} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Methodology Comparison Matrix" contentKey="methodology" content={reviewData.methodology_comparison} isExpanded={!!expandedSections.methodology} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Datasets & Benchmark Evaluation" contentKey="datasets" content={reviewData.datasets_used} isExpanded={!!expandedSections.datasets} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Consolidated Key Findings" contentKey="findings" content={reviewData.key_findings} isExpanded={!!expandedSections.findings} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Emerging Research Trends" contentKey="trends" content={reviewData.research_trends} isExpanded={!!expandedSections.trends} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Critical Research Gaps" contentKey="gaps" content={reviewData.research_gaps} isExpanded={!!expandedSections.gaps} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Future Research Scope" contentKey="scope" content={reviewData.future_scope} isExpanded={!!expandedSections.scope} onToggle={toggleSection} />
+          <ExpandableReviewSection title="Consolidated Conclusion" contentKey="conclusion" content={reviewData.conclusion} isExpanded={!!expandedSections.conclusion} onToggle={toggleSection} />
+          <ExpandableReviewSection title="References & Bibliography" contentKey="references" content={reviewData.references} isExpanded={!!expandedSections.references} onToggle={toggleSection} />
         </div>
       )}
     </div>
