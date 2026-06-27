@@ -4,6 +4,8 @@ import { useState } from "react";
 import { FileText, GitCompare, Lightbulb, BookOpen, Quote } from "lucide-react";
 import { SummaryTab } from "../features/analysis-tabs/SummaryTab";
 import { CompareTab } from "../features/analysis-tabs/CompareTab";
+import { ResearchGapTab } from "../features/analysis-tabs/ResearchGapTab";
+import { LiteratureReviewTab } from "../features/analysis-tabs/LiteratureReviewTab";
 
 export function RightAnalysisPanel() {
   const [activeTab, setActiveTab] = useState('summary');
@@ -22,6 +24,10 @@ export function RightAnalysisPanel() {
         return <SummaryTab />;
       case 'compare':
         return <CompareTab />;
+      case 'gaps':
+        return <ResearchGapTab />;
+      case 'lit-review':
+        return <LiteratureReviewTab />;
       default:
         return (
           <div className="card h-full flex flex-col items-center justify-center text-center p-6 border-dashed border-2 border-border bg-transparent">

@@ -7,7 +7,10 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db, SessionLocal
 from app.models import Paper
-from app.schemas import PaperResponse, PaperSummaryResponse, ComparePapersRequest, ComparePapersResponse
+from app.schemas import (
+    PaperResponse, PaperSummaryResponse, ComparePapersRequest, ComparePapersResponse,
+    GapAnalysisRequest, GapAnalysisResponse, LiteratureReviewRequest, LiteratureReviewResponse
+)
 from app.config import settings
 from app.services.pdf.pdf_parser import parse_pdf
 from app.services.pdf.document_processor import process_document
@@ -15,6 +18,8 @@ from app.services.vector.embedding_service import generate_chunk_embeddings
 from app.services.vector.vector_store import vector_store_service
 from app.services.ai.summary_service import generate_paper_summary
 from app.services.ai.compare_service import generate_papers_comparison
+from app.services.ai.gap_service import generate_gap_analysis
+from app.services.ai.literature_service import generate_literature_review
 
 router = APIRouter(prefix="/papers", tags=["papers"])
 
@@ -211,6 +216,60 @@ def compare_papers(req: ComparePapersRequest, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Comparison generation failed: {e}")
         raise HTTPException(status_code=500, detail="Comparison generation failed")
+
+@router.post("/gap-analysis", response_model=GapAnalysisResponse, status_code=200)
+def analyze_research_gaps(req: GapAnalysisRequest, db: Session = Depends(get_db)):
+    """
+    Feature 9: Analyzes research gaps across 2-5 uploaded papers based on representative chunks.
+    """
+    if not (2 <= len(req.paper_ids) <= 5):
+        raise HTTPException(status_code=400, detail="Please select between 2 and 5 papers for gap analysis.")
+
+    papers_meta = []
+    for pid in req.paper_ids:
+        p = db.query(Paper).filter(Paper.id == pid).first()
+        if not p:
+            raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
+        papers_meta.append({"paper_id": str(p.id), "paper_title": str(p.title or "Untitled Paper")})
+
+    try:
+        analysis_data = generate_gap_analysis(papers_meta)
+        payload = {
+            "papers": papers_meta,
+            "analysis": analysis_data
+        }
+        validated = GapAnalysisResponse.model_validate(payload)
+        return validated.model_dump()
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Gap analysis generation failed: {e}")
+        raise HTTPException(status_code=500, detail="Gap analysis generation failed")
+
+@router.post("/literature-review", response_model=LiteratureReviewResponse, status_code=200)
+def create_literature_review(req: LiteratureReviewRequest, db: Session = Depends(get_db)):
+    """
+    Feature 10: Generates structured academic literature review across 2-10 uploaded papers.
+    """
+    if not (2 <= len(req.paper_ids) <= 10):
+        raise HTTPException(status_code=400, detail="Please select between 2 and 10 papers for literature review.")
+
+    papers_meta = []
+    for pid in req.paper_ids:
+        p = db.query(Paper).filter(Paper.id == pid).first()
+        if not p:
+            raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
+        papers_meta.append({"paper_id": str(p.id), "paper_title": str(p.title or "Untitled Paper")})
+
+    try:
+        review_data = generate_literature_review(papers_meta)
+        validated = LiteratureReviewResponse.model_validate(review_data)
+        return validated.model_dump()
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Literature review generation failed: {e}")
+        raise HTTPException(status_code=500, detail="Literature review generation failed")
 
 @router.delete("/{paper_id}", status_code=200)
 def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:

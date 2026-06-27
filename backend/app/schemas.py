@@ -44,6 +44,43 @@ class ComparePapersResponse(BaseModel):
     papers: List[PaperHeaderItem]
     comparison: ComparisonContent
 
+class GapAnalysisRequest(BaseModel):
+    paper_ids: List[str] = Field(..., min_length=2, max_length=5)
+
+class GapAnalysisContent(BaseModel):
+    current_research_coverage: str
+    common_themes: List[str]
+    conflicting_findings: List[str]
+    research_gaps: List[str]
+    future_research_opportunities: List[str]
+    potential_research_questions: List[str]
+
+class GapAnalysisResponse(BaseModel):
+    papers: List[PaperHeaderItem]
+    analysis: GapAnalysisContent
+
+class LiteratureReviewRequest(BaseModel):
+    paper_ids: List[str] = Field(..., min_length=2, max_length=10)
+
+class LiteratureReferenceItem(BaseModel):
+    paper_title: str
+    citation: str
+
+class LiteratureReviewResponse(BaseModel):
+    title: str
+    introduction: str
+    research_objectives: str
+    related_work: str
+    methodology_comparison: str
+    datasets_used: str
+    key_findings: str
+    research_trends: str
+    research_gaps: str
+    future_scope: str
+    conclusion: str
+    references: List[LiteratureReferenceItem]
+
+
 class PaperResponse(BaseModel):
     id: str
     filename: str

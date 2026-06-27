@@ -47,6 +47,31 @@ export const api = {
     });
     if (!response.ok) throw new Error(`Failed to compare papers: ${response.status}`);
     return response.json();
+  },
+
+  analyzeGaps: async (paperIds: string[]) => {
+    const response = await fetch(`${API_URL}/papers/gap-analysis`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_ids: paperIds }),
+    });
+    if (!response.ok) throw new Error(`Failed to perform gap analysis: ${response.status}`);
+    return response.json();
+  },
+
+  generateLiteratureReview: async (paperIds: string[]) => {
+    const response = await fetch(`${API_URL}/papers/literature-review`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_ids: paperIds }),
+    });
+    if (!response.ok) throw new Error(`Failed to generate literature review: ${response.status}`);
+    return response.json();
   }
 };
+
 
