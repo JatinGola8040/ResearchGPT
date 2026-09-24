@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUpload } from "../pdf-upload/UploadContext";
 import { api } from "../../../lib/api";
-import { Loader2, AlertCircle, FileText } from "lucide-react";
+import { Loader2, AlertCircle, FileText, Sparkles, CheckCircle, Cpu, BarChart2, ShieldAlert } from "lucide-react";
 
 interface SummaryData {
   executive_summary?: string;
@@ -32,7 +32,6 @@ export function SummaryTab() {
       try {
         const data = await api.getSummary(selectedPaperId);
         
-        // Safely map the backend response allowing standard variations
         setSummary({
           executive_summary: data.executive_summary || data.summary || "No executive summary provided.",
           key_contributions: Array.isArray(data.key_contributions) ? data.key_contributions : [],
@@ -42,7 +41,7 @@ export function SummaryTab() {
         });
       } catch (err) {
         console.error("Failed to load summary:", err);
-        setError("Failed to generate summary. Please try again.");
+        setError("Failed to generate summary synthesis. Please retry.");
       } finally {
         setIsLoading(false);
       }
@@ -53,11 +52,11 @@ export function SummaryTab() {
 
   if (!selectedPaperId) {
     return (
-      <div className="card h-full flex flex-col items-center justify-center text-center p-6 border-dashed border-2 border-border bg-transparent">
-        <FileText className="w-10 h-10 text-muted mb-4 opacity-50" />
-        <h3 className="text-sm font-medium text-foreground mb-2">Summary View</h3>
-        <p className="text-xs text-muted">
-          Select a paper from the left sidebar to see its auto-generated insights here.
+      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
+        <FileText className="w-8 h-8 text-zinc-600 mb-3" />
+        <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1">Summary Synthesis</h3>
+        <p className="text-xs text-zinc-500 max-w-xs">
+          Select an indexed manuscript from the left repository to inspect automated insights.
         </p>
       </div>
     );
@@ -65,18 +64,18 @@ export function SummaryTab() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4">
-        <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-sm text-muted">Generating comprehensive summary...</p>
+      <div className="flex flex-col items-center justify-center h-60 space-y-3">
+        <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+        <p className="text-xs font-mono text-zinc-400">Synthesizing executive briefing...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full space-y-4 p-6 text-center">
-        <AlertCircle className="w-8 h-8 text-red-400" />
-        <p className="text-sm text-red-400">{error}</p>
+      <div className="flex flex-col items-center justify-center h-60 space-y-3 p-6 text-center rounded-xl bg-red-500/10 border border-red-500/30">
+        <AlertCircle className="w-6 h-6 text-red-400" />
+        <p className="text-xs font-mono text-red-400">{error}</p>
       </div>
     );
   }
@@ -85,35 +84,55 @@ export function SummaryTab() {
 
   return (
     <div className="space-y-4 pb-6">
-      <div className="card p-4 bg-surface-elevated border-border">
-        <h3 className="text-sm font-semibold text-primary mb-2">Executive Summary</h3>
-        <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{summary.executive_summary}</p>
+      <div className="p-4 rounded-xl bg-gradient-to-br from-[#131418] to-[#0B0C0E] border border-cyan-500/30 shadow-lg space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Executive Synthesis</span>
+        </div>
+        <p className="text-xs text-zinc-300 leading-relaxed font-serif italic border-l-2 border-cyan-500/60 pl-3">
+          {summary.executive_summary}
+        </p>
       </div>
 
       {summary.key_contributions && summary.key_contributions.length > 0 && (
-        <div className="card p-4 bg-surface-elevated border-border">
-          <h3 className="text-sm font-semibold text-primary mb-2">Key Contributions</h3>
-          <ul className="list-disc pl-5 space-y-1 text-sm text-muted">
+        <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
+            <CheckCircle className="w-3.5 h-3.5" />
+            <span>Key Contributions</span>
+          </div>
+          <ul className="space-y-2 text-xs text-zinc-300">
             {summary.key_contributions.map((item, idx) => (
-              <li key={idx}>{item}</li>
+              <li key={idx} className="flex items-start gap-2 bg-white/[0.02] p-2.5 rounded-lg border border-white/[0.04]">
+                <span className="text-purple-400 font-mono font-bold shrink-0">0{idx+1}.</span>
+                <span className="leading-relaxed">{item}</span>
+              </li>
             ))}
           </ul>
         </div>
       )}
 
-      <div className="card p-4 bg-surface-elevated border-border">
-        <h3 className="text-sm font-semibold text-primary mb-2">Methodology</h3>
-        <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{summary.methodology}</p>
+      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
+          <Cpu className="w-3.5 h-3.5" />
+          <span>Methodology</span>
+        </div>
+        <p className="text-xs text-zinc-400 leading-relaxed">{summary.methodology}</p>
       </div>
 
-      <div className="card p-4 bg-surface-elevated border-border">
-        <h3 className="text-sm font-semibold text-primary mb-2">Results</h3>
-        <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{summary.results}</p>
+      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+          <BarChart2 className="w-3.5 h-3.5" />
+          <span>Empirical Results</span>
+        </div>
+        <p className="text-xs text-zinc-400 leading-relaxed">{summary.results}</p>
       </div>
 
-      <div className="card p-4 bg-surface-elevated border-border">
-        <h3 className="text-sm font-semibold text-primary mb-2">Limitations</h3>
-        <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{summary.limitations}</p>
+      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-pink-400 uppercase tracking-wider">
+          <ShieldAlert className="w-3.5 h-3.5" />
+          <span>Known Limitations</span>
+        </div>
+        <p className="text-xs text-zinc-400 leading-relaxed">{summary.limitations}</p>
       </div>
     </div>
   );

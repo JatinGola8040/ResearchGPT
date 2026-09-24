@@ -1,8 +1,12 @@
 import json
+import logging
 from typing import Dict, Any, List
 from app.config import settings
-from app.services.ai.rag_service import get_groq_client, build_rag_prompt
-from app.services.vector.retriever import retrieve_relevant_chunks, format_citations
+from app.services.llm_client import llm_client, LLMException
+from app.services.ai.rag_service import build_rag_prompt
+from app.services.vector.retriever import retrieve_relevant_chunks, format_citations, validate_citations
+
+logger = logging.getLogger("researchgpt.literature_service")
 
 LITERATURE_SYSTEM_PROMPT = """You are ResearchGPT, an expert academic literature review assistant.
 Your goal is to synthesize retrieved text fragments across multiple research papers into a comprehensive, structured academic literature review.
@@ -24,7 +28,7 @@ You MUST respond ONLY with a valid JSON object containing precisely these keys:
 Rules:
 1. Rely strictly on the provided text fragments. Do not hallucinate external details.
 2. If any aspect lacks sufficient evidence in the retrieved context, return "Not explicitly mentioned in the retrieved context." for string fields.
-3. Return raw valid JSON only."""
+3. Return raw valid JSON only. Do not include markdown code fences, reasoning text, or extra commentary."""
 
 def _clean_references(val: Any, papers_meta: List[Dict[str, str]]) -> List[Dict[str, str]]:
     if not isinstance(val, list):
@@ -49,8 +53,7 @@ def _clean_references(val: Any, papers_meta: List[Dict[str, str]]) -> List[Dict[
 
 def generate_literature_review(papers_meta: List[Dict[str, str]]) -> Dict[str, Any]:
     """
-    Retrieves representative chunks for selected papers and queries Groq to generate structured literature review.
-    papers_meta format: [{"paper_id": ..., "paper_title": ...}, ...]
+    Retrieves representative chunks for selected papers and queries OpenRouter to generate structured literature review.
     """
     all_chunks = []
     query = "abstract introduction objectives related work methodology datasets benchmark results findings trends gaps future conclusion"
@@ -58,10 +61,16 @@ def generate_literature_review(papers_meta: List[Dict[str, str]]) -> Dict[str, A
     for p in papers_meta:
         pid = p["paper_id"]
         title = p["paper_title"]
-        chunks = retrieve_relevant_chunks(query=query, top_k=6, filter_paper_id=pid)
+        chunks = retrieve_relevant_chunks(
+            query=query,
+            top_k=3,
+            filter_paper_id=pid,
+            expand_query=True
+        )
         if not chunks:
             chunks = [{
                 "paper_title": title,
+                "paper_id": pid,
                 "page": 1,
                 "chunk_text": "No indexed document context available for this research paper."
             }]
@@ -70,23 +79,23 @@ def generate_literature_review(papers_meta: List[Dict[str, str]]) -> Dict[str, A
     question = "Analyze the retrieved research paper fragments and generate a comprehensive academic literature review synthesizing introduction, objectives, related work, methodologies, datasets, findings, trends, gaps, future scope, conclusion, and references. Generate the structured JSON literature review below."
     user_prompt = build_rag_prompt(all_chunks, question)
 
-    model_name = getattr(settings, "GROQ_MODEL", "llama-3.3-70b-versatile")
-    client = get_groq_client()
+    messages = [
+        {"role": "system", "content": LITERATURE_SYSTEM_PROMPT},
+        {"role": "user", "content": user_prompt}
+    ]
 
     try:
-        completion = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": LITERATURE_SYSTEM_PROMPT},
-                {"role": "user", "content": user_prompt}
-            ],
-            model=model_name,
-            temperature=0.1,
-            response_format={"type": "json_object"}
-        )
-        raw_content = completion.choices[0].message.content.strip() if completion.choices else "{}"
-        data = json.loads(raw_content)
+        logger.info(f"Generating literature review across {len(papers_meta)} papers using OpenRouter")
+        data = llm_client.generate_json(messages=messages)
+    except LLMException as e:
+        logger.error(f"Literature review AI generation failed: {e.code} - {e.message}")
+        raise RuntimeError(f"{e.code}: {e.message}")
     except Exception as e:
-        raise RuntimeError(f"Literature review AI generation failed: {e}")
+        logger.error(f"Literature review AI generation failed: {e}")
+        raise RuntimeError(f"LLM_PROVIDER_ERROR: {e}")
+
+    raw_citations = format_citations(all_chunks)
+    validated_citations = validate_citations(raw_citations, all_chunks)
 
     return {
         "title": str(data.get("title") or "Literature Review"),
@@ -101,5 +110,5 @@ def generate_literature_review(papers_meta: List[Dict[str, str]]) -> Dict[str, A
         "future_scope": str(data.get("future_scope") or "Not specified."),
         "conclusion": str(data.get("conclusion") or "Not specified."),
         "references": _clean_references(data.get("references"), papers_meta),
-        "citations": format_citations(all_chunks)
+        "citations": validated_citations
     }

@@ -1,0 +1,467 @@
+{
+  "step2": {
+    "indexed_papers_count": 10,
+    "indexed_papers": [
+      {
+        "id": "916ce1b1-2c6c-48ec-9600-48780193ecfd",
+        "title": "Blockchain A Game Changer for Securing IoT Data",
+        "pages": "5"
+      },
+      {
+        "id": "07a0da67-c8ea-46ab-9446-b61914186102",
+        "title": "Blockchain technology for security issues and challenges in IoT",
+        "pages": "9"
+      },
+      {
+        "id": "d18b6fae-2930-4252-83ab-94c35ca18882",
+        "title": "hewa2020",
+        "pages": "8"
+      },
+      {
+        "id": "70adc7a1-6dd1-46a6-b38b-212c547a3c84",
+        "title": "Enhancing Iot Security and Efficiency_Final",
+        "pages": "14"
+      },
+      {
+        "id": "f9a4d5af-e322-4b2a-9201-67c565eee0ea",
+        "title": "Integrating Blockchain and 5G Technologies for Enhanced Edge Computing",
+        "pages": "9"
+      },
+      {
+        "id": "18e2b303-7051-4b0c-9d45-7b00a6afa2c3",
+        "title": "Enhancing IoT Security and Efficiency",
+        "pages": "14"
+      },
+      {
+        "id": "08e5c5d5-0bc7-4d01-9d93-8048ab794f55",
+        "title": "Securing Smart Cities Using Blockchain Technology",
+        "pages": "2"
+      },
+      {
+        "id": "991c118d-44ab-435f-acc6-3d3e4f8836e6",
+        "title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "pages": "18"
+      },
+      {
+        "id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "pages": "12"
+      },
+      {
+        "id": "6d0f0617-e929-4ec4-b6d0-3fa58db7fe12",
+        "title": "Edge Computing and Its Convergence With Blockchain",
+        "pages": "34"
+      }
+    ],
+    "chromadb_total_documents": 749,
+    "query": "Identify unresolved research gaps across papers",
+    "chunks_retrieved_count": 6,
+    "chunks": [
+      {
+        "paper_id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 10,
+        "similarity_score": 0.5117,
+        "snippet": "9\n1\n5\n10\n25\n50\nNumber of concurrent transactions in a batch\n0\n20\n40\n60\n80\n100\n120\nBatch completion time in seconds\nBatchTimeout=500ms (Proposal)\nBatchTimeout=1s (Proposal)\nBatchTimeout=2s(Proposal)\nBatchTimeout=2s(Cloud integration)\nFig. 6: Certificate activation and IoT-CSP channel key estab-\nlishm"
+      },
+      {
+        "paper_id": "6d0f0617-e929-4ec4-b6d0-3fa58db7fe12",
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 12,
+        "similarity_score": 0.498,
+        "snippet": "re argued\nto \ufb01nd the optimal allocation scheme, comprising latency,\nenergy, bandwidth, and cost.\na: LATENCY\nThe performance evaluation of edge computing applications\nis done by calculating the latency matrices, speci\ufb01cally in\ninteracting applications or services [124], [125]. Long com-\nmunication de"
+      },
+      {
+        "paper_id": "f9a4d5af-e322-4b2a-9201-67c565eee0ea",
+        "paper_title": "Integrating Blockchain and 5G Technologies for Enhanced Edge Computing",
+        "page": 4,
+        "similarity_score": 0.4643,
+        "snippet": "Malik et al. International Journal of Recent Advances in Multidisciplinary Topics, VOL. 5, NO. 2, FEBRUARY 2024\n38\nresources, can strain these constraints, leading to performance\ndegradation and increased energy consumption.\nConsiderations: Optimizing blockchain protocols for\nresource-constrained en"
+      },
+      {
+        "paper_id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 9,
+        "similarity_score": 0.4596,
+        "snippet": "d IoT-CSP channel\nkey establishment\nIn this experiment, we evaluated the end-to-end latency\non Step 1 \u22123 of Figure 2 when gradually increasing the\nconcurrent transaction volume. Furthermore, we modified the\nproposed architecture with cloud-based MQTT routing to com-\npare additional latency incurred "
+      },
+      {
+        "paper_id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 9,
+        "similarity_score": 0.4533,
+        "snippet": "h simulation\nIoT node search latency in proposed architecture\nFig. 5: IoT node search latency comparison\nFrom the experimental evaluation, the proposed work yields\nbetter search latency when compared with the cloud-based\nPKI. Even though the records are stored in extended storage,\nthe search latency"
+      },
+      {
+        "paper_id": "6d0f0617-e929-4ec4-b6d0-3fa58db7fe12",
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 11,
+        "similarity_score": 0.4525,
+        "snippet": "tworks to modify the dimension as\nfurther applications, edge nodes, users, or things got attached\nor detached from the network.\niii) SCALABLE RELIABILITY\nIt allows the system to keep redundant edge capabilities to\nwithstand the faults or overloads. Additional edge nodes can\nguarantee the integrity a"
+      }
+    ],
+    "prompt_char_length": 5691,
+    "prompt_preview": "Retrieved Research Context Excerpts:\n[Source: Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing | Page: 10]\n9\n1\n5\n10\n25\n50\nNumber of concurrent transactions in a batch\n0\n20\n40\n60\n80\n100\n120\nBatch completion time in seconds\nBatchTimeout=500ms (Proposal)\nBatchTimeout=1s (Proposal)\nBatchTimeout=2s(Proposal)\nBatchTimeout=2s(Cloud integra...",
+    "validated_citations_count": 5,
+    "validated_citations": [
+      {
+        "paper_id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 10,
+        "snippet": "9\n1\n5\n10\n25\n50\nNumber of concurrent transactions in a batch\n0\n20\n40\n60\n80\n100\n120\nBatch completion time in seconds\nBatchTimeout=500ms (Proposal)\nBatchTimeout=1s (Proposal)\nBatchTimeout=2s(Proposal)\nBa...",
+        "relevance_score": 0.5117
+      },
+      {
+        "paper_id": "6d0f0617-e929-4ec4-b6d0-3fa58db7fe12",
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 12,
+        "snippet": "re argued\nto \ufb01nd the optimal allocation scheme, comprising latency,\nenergy, bandwidth, and cost.\na: LATENCY\nThe performance evaluation of edge computing applications\nis done by calculating the latency...",
+        "relevance_score": 0.498
+      },
+      {
+        "paper_id": "f9a4d5af-e322-4b2a-9201-67c565eee0ea",
+        "paper_title": "Integrating Blockchain and 5G Technologies for Enhanced Edge Computing",
+        "page": 4,
+        "snippet": "Malik et al. International Journal of Recent Advances in Multidisciplinary Topics, VOL. 5, NO. 2, FEBRUARY 2024\n38\nresources, can strain these constraints, leading to performance\ndegradation and incre...",
+        "relevance_score": 0.4643
+      },
+      {
+        "paper_id": "369c1c41-1ae0-4ff0-9d84-7afefb56b2c1",
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 9,
+        "snippet": "d IoT-CSP channel\nkey establishment\nIn this experiment, we evaluated the end-to-end latency\non Step 1 \u22123 of Figure 2 when gradually increasing the\nconcurrent transaction volume. Furthermore, we modifi...",
+        "relevance_score": 0.4596
+      },
+      {
+        "paper_id": "6d0f0617-e929-4ec4-b6d0-3fa58db7fe12",
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 11,
+        "snippet": "tworks to modify the dimension as\nfurther applications, edge nodes, users, or things got attached\nor detached from the network.\niii) SCALABLE RELIABILITY\nIt allows the system to keep redundant edge ca...",
+        "relevance_score": 0.4525
+      }
+    ]
+  },
+  "step3": {
+    "research gaps": [
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 5,
+        "similarity": 0.2641,
+        "is_noise": false,
+        "snippet": " among different entities: government, universities, companies and so on. The information is spread across many entities and accessing it is time consuming, even when said entities answer to the same authority, e.g., the government. This leads to obs"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 2,
+        "similarity": 0.2429,
+        "is_noise": false,
+        "snippet": "ination of the pork, the transportation of the animals between factories must also be registered by law. These scenarios involve many participants, some of them still relying on non-automated information handling methods. In the case of food contamin"
+      },
+      {
+        "paper_title": "Blockchain technology for security issues and challenges in IoT",
+        "page": 4,
+        "similarity": 0.2348,
+        "is_noise": false,
+        "snippet": "ors to information processing and storage unit i.e. typically raw information processing and data storage in the form of report states. During this process chances of losing, mishandling of the data occurs making the data flow process not 100 %. This"
+      }
+    ],
+    "limitations": [
+      {
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 21,
+        "similarity": 0.3775,
+        "is_noise": false,
+        "snippet": "ITY The blockchain becomes bulky with every passing day by increasing the number of transactions and has surpassed 100 GB storage at present. For validation, all these trans- actions need to be stored by the nodes. Moreover, there is a restriction on"
+      },
+      {
+        "paper_title": "hewa2020",
+        "page": 6,
+        "similarity": 0.3413,
+        "is_noise": false,
+        "snippet": "d signi\ufb01cant limitations in privacy enforcement due to the resource-restricted hardware. Especially, when the Blockchain is considered, the data privacy is not in- built since the transactions are appended to the ledger pub- licly upon veri\ufb01cation. P"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 6,
+        "similarity": 0.2922,
+        "is_noise": false,
+        "snippet": "d the number of transactions performed. In other words, productive network activity is also rewarded, not just the amount, promoting the useful behavior of the users. Other extended variants are the activity test (PoA), a hybrid ap- proach that combi"
+      }
+    ],
+    "future work": [
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 3,
+        "similarity": 0.3535,
+        "is_noise": false,
+        "snippet": "A. Reyna et al. / Future Generation Computer Systems 88 (2018) 173\u2013190 175 Table 1 Bitcoin nodes and functionality. Wallet Storage Mining Routing x x x x Bitcoin core x x Full node x x x Solo miner x x Light wallet of work. The nodes that perform the"
+      },
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 12,
+        "similarity": 0.2916,
+        "is_noise": false,
+        "snippet": "ital payment systems com- pany in Sri Lanka for 5 years. He has joined Nanyang Technological University, Singapore as a Research Associate in 2017. After two years, he has joined Center for Wireless Communications, University of Oulu. His research in"
+      },
+      {
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 7,
+        "similarity": 0.2883,
+        "is_noise": false,
+        "snippet": "] shown in Figure 4. The architecture in Figure 4 represents the applicability and ef\ufb01ciency of blockchain in mobile and static edge com- puting environments. All the devices in this network archi- tecture gather, store, provide services, and communi"
+      }
+    ],
+    "future research": [
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 12,
+        "similarity": 0.4043,
+        "is_noise": false,
+        "snippet": "Laboratory and Inria, Sophia Antipolis, France. He was also a recipient of the prestigious Marie Sk\u0142odowska-Curie Actions Individual Fellowship and Government of Ireland Postdoctoral Fellowship during 2018-2020. During 2015-2018, he has been a Visiti"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 18,
+        "similarity": 0.318,
+        "is_noise": false,
+        "snippet": " of Languages and Com- puter Science of the University of M\u00e1laga where he is an associate professor since 2002. He has published several papers in the field of high performance computing and simulation of complex systems, such as nuclear power plants"
+      },
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 12,
+        "similarity": 0.3075,
+        "is_noise": false,
+        "snippet": "Living Environments), involving more than 24 different countries in Europe. In 2020, she co-edited the book on IoT Security-Advances in Authentication, published by Wiley. Madhusanka Liyanage (Senior Member, IEEE) is an Assistant Professor/Ad Astra F"
+      }
+    ],
+    "unresolved problems": [
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 18,
+        "similarity": 0.1686,
+        "is_noise": false,
+        "snippet": " of Languages and Com- puter Science of the University of M\u00e1laga where he is an associate professor since 2002. He has published several papers in the field of high performance computing and simulation of complex systems, such as nuclear power plants"
+      },
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 3,
+        "similarity": 0.1411,
+        "is_noise": false,
+        "snippet": "2 TABLE I: Important notations and acronyms Acronym Definition 5G 5th Generation 5GTN 5th Generation Test Network CA Certificate Authority CM Cloud Manufacturing CSP Cloud Service Provider DH Diffie-Hellman ECC Elliptic Curve Cryptography ECDHP Ellip"
+      },
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 12,
+        "similarity": 0.1305,
+        "is_noise": false,
+        "snippet": "Laboratory and Inria, Sophia Antipolis, France. He was also a recipient of the prestigious Marie Sk\u0142odowska-Curie Actions Individual Fellowship and Government of Ireland Postdoctoral Fellowship during 2018-2020. During 2015-2018, he has been a Visiti"
+      }
+    ],
+    "open challenges": [
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 3,
+        "similarity": 0.2389,
+        "is_noise": false,
+        "snippet": "2 TABLE I: Important notations and acronyms Acronym Definition 5G 5th Generation 5GTN 5th Generation Test Network CA Certificate Authority CM Cloud Manufacturing CSP Cloud Service Provider DH Diffie-Hellman ECC Elliptic Curve Cryptography ECDHP Ellip"
+      },
+      {
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 29,
+        "similarity": 0.2386,
+        "is_noise": false,
+        "snippet": "ures, and diverse protocols to achieve the ultimate objective of secure and reliable edge computing networking services. Implementation of blockchain-based solutions will be one of our future studies to resolve the security and privacy issues faced b"
+      },
+      {
+        "paper_title": "Integrating Blockchain and 5G Technologies for Enhanced Edge Computing",
+        "page": 3,
+        "similarity": 0.2126,
+        "is_noise": false,
+        "snippet": "nge between different blockchain platforms, edge devices, and 5G networks is crucial for the success of the integrated system. Considerations: Developing standardized protocols and interfaces that enable interoperability between various components is"
+      }
+    ],
+    "weaknesses of the proposed method": [
+      {
+        "paper_title": "Enhancing IoT Security and Efficiency",
+        "page": 8,
+        "similarity": 0.2777,
+        "is_noise": false,
+        "snippet": "Table 1. Comparative analysis of different techniques used in the \ufb01eld of Blockchain and IoT"
+      },
+      {
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 34,
+        "similarity": 0.2454,
+        "is_noise": false,
+        "snippet": ". He has published more than 140 peer-reviewed conference papers, three book chapters, and two books, journal articles (mostly in the IEEE TRANSACTIONS ON SIGNAL PROCESSING), more than, including a recent textbook, Convex Opti- mization for Signal Pr"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 6,
+        "similarity": 0.234,
+        "is_noise": false,
+        "snippet": "algorithm, which is based on state machine replication and replicate voting for consensus on state change, is used in Hyperledger and Multichain. SIEVE [73], treats the blockchain as a black box, executing operations and comparing the output of each "
+      }
+    ],
+    "limitations of existing approaches": [
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 5,
+        "similarity": 0.3261,
+        "is_noise": false,
+        "snippet": " among different entities: government, universities, companies and so on. The information is spread across many entities and accessing it is time consuming, even when said entities answer to the same authority, e.g., the government. This leads to obs"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 6,
+        "similarity": 0.2941,
+        "is_noise": false,
+        "snippet": ". This together with the mint reduction, reward diminution and fee increase could compromise the system [64] in the future. Certainly, PoW has certain drawbacks such as high latency, low transaction rates and high energy expenditure that makes it uns"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 3,
+        "similarity": 0.2886,
+        "is_noise": false,
+        "snippet": "ock to be successfully added to the chain, it would be necessary to solve the proof of work faster than the rest of the net- work, which is computationally too expensive \u2014 it requires having control of at least 51% of the computing resources in the n"
+      }
+    ],
+    "future directions": [
+      {
+        "paper_title": "Edge Computing and Its Convergence With Blockchain",
+        "page": 7,
+        "similarity": 0.2513,
+        "is_noise": false,
+        "snippet": "] shown in Figure 4. The architecture in Figure 4 represents the applicability and ef\ufb01ciency of blockchain in mobile and static edge com- puting environments. All the devices in this network archi- tecture gather, store, provide services, and communi"
+      },
+      {
+        "paper_title": "Enhancing Iot Security and Efficiency_Final",
+        "page": 8,
+        "similarity": 0.2489,
+        "is_noise": false,
+        "snippet": "y minimiz- ing the need of any human intervention. 1. Supply Chain Management. \u2022 Use Case: Supply chain management can be revolutionized by integrating 5G\u2019s real time tracking of goods and services in transit, providing stakeholders with up-to-date"
+      },
+      {
+        "paper_title": "Blockchain technology for security issues and challenges in IoT",
+        "page": 9,
+        "similarity": 0.2487,
+        "is_noise": false,
+        "snippet": "rt home.\u201d2017 IEEE International Conference on Pervasive Computing and Communications Workshops (PerCom Workshops), Kona, HI, pp. 618-623. doi: 10.1109/PERCOMW.2017.7917634 [19]. Fujitsu Laboratories of America Technology Symposium (2016) http://www."
+      }
+    ],
+    "research questions": [
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 6,
+        "similarity": 0.248,
+        "is_noise": false,
+        "snippet": "ay for many services. For instance, in the case of a job interview, candidates could share their college degrees and work experience information with the interviewers. This informa- tion is reliable and verifiable by definition. These initiatives are"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 5,
+        "similarity": 0.2332,
+        "is_noise": false,
+        "snippet": " among different entities: government, universities, companies and so on. The information is spread across many entities and accessing it is time consuming, even when said entities answer to the same authority, e.g., the government. This leads to obs"
+      },
+      {
+        "paper_title": "Blockchain A Game Changer for Securing IoT Data",
+        "page": 2,
+        "similarity": 0.2298,
+        "is_noise": false,
+        "snippet": "mining'. The proof of work has to be verified by the other nodes present on the network. 2) Distributed database system: The database, which is composed of blocks of information, is copied to every node of the system. Each block contains the followin"
+      }
+    ],
+    "Identify unresolved research gaps across papers": [
+      {
+        "paper_title": "Blockchain technology for security issues and challenges in IoT",
+        "page": 8,
+        "similarity": 0.2508,
+        "is_noise": false,
+        "snippet": "1822 Nallapaneni Manoj Kumar et al. / Procedia Computer Science 132 (2018) 1815\u20131823 Table 3. Category based applications of blockchain technology Category Application area or the use cases Attestation In most cases, a proof is required to show wheth"
+      },
+      {
+        "paper_title": "On blockchain and its integration with IoT. Challenges and Oppurtunities",
+        "page": 6,
+        "similarity": 0.2113,
+        "is_noise": false,
+        "snippet": "dered in the rest of the paper should necessarily go hand in hand with these initiatives. 2.1.6. Consensus Consensus mechanisms [61\u201363] are responsible for the in- tegrity of the information contained in blockchain, while defending against double-spe"
+      },
+      {
+        "paper_title": "Fog Computing and Blockchain-Based Security Service Architecture for 5G Industrial IoT-Enabled Cloud Manufacturing",
+        "page": 12,
+        "similarity": 0.1974,
+        "is_noise": false,
+        "snippet": "Laboratory and Inria, Sophia Antipolis, France. He was also a recipient of the prestigious Marie Sk\u0142odowska-Curie Actions Individual Fellowship and Government of Ireland Postdoctoral Fellowship during 2018-2020. During 2015-2018, he has been a Visiti"
+      }
+    ]
+  },
+  "step5": {
+    "sample_papers_count": 3,
+    "sample_papers": [
+      {
+        "paper_id": "916ce1b1-2c6c-48ec-9600-48780193ecfd",
+        "paper_title": "Blockchain A Game Changer for Securing IoT Data"
+      },
+      {
+        "paper_id": "07a0da67-c8ea-46ab-9446-b61914186102",
+        "paper_title": "Blockchain technology for security issues and challenges in IoT"
+      },
+      {
+        "paper_id": "d18b6fae-2930-4252-83ab-94c35ca18882",
+        "paper_title": "hewa2020"
+      }
+    ],
+    "gap_evidence_chunks_count": 6,
+    "gap_evidence_chunks": [
+      {
+        "paper_title": "Blockchain A Game Changer for Securing IoT Data",
+        "page": 5,
+        "similarity": 0.3025,
+        "snippet": "hlhaas\n[13] C. Decker and R. Wattenhofer, \u201cA fast and scalable payment\nnetwork with bitcoin duplex micropayment channels,\u201d In\nStabilization, Safety, and Security of Distributed Systems pages\n3\u201318. Springer, 2015\n[14] Das, Manik Lal, \"Privacy and Secu"
+      },
+      {
+        "paper_title": "Blockchain A Game Changer for Securing IoT Data",
+        "page": 5,
+        "similarity": 0.2616,
+        "snippet": "Example: A Use Case for the Blockchain based IoT Security\nModel:\nFig.7. shows a series of IOT devices interconnected with\neach other on a network. Securing them with a blockchain\nnetwork makes the system decentralized, in which there is no\nsingle aut"
+      },
+      {
+        "paper_title": "Blockchain technology for security issues and challenges in IoT",
+        "page": 3,
+        "similarity": 0.3257,
+        "snippet": "hieved with shard collaborations.\n\nRegulation\nIoT device or software developing without the security laws\n\nDevice obsolescence\nLimited implications on replacing the old and undesirable devices\nPrivacy concerns\nFairness in data collection and use\nLack"
+      },
+      {
+        "paper_title": "Blockchain technology for security issues and challenges in IoT",
+        "page": 6,
+        "similarity": 0.3162,
+        "snippet": "er messaging in faster way with the help of distributed ledger as\nshown in Fig. 2. The data flow process in IoT with BC technology is different from only IoT system. In IoT with\nBC, the data flow is from sensors-network-router-internet-distributed bl"
+      },
+      {
+        "paper_title": "hewa2020",
+        "page": 6,
+        "similarity": 0.4252,
+        "snippet": "d signi\ufb01cant limitations in privacy enforcement\ndue to the resource-restricted hardware. Especially, when\nthe Blockchain is considered, the data privacy is not in-\nbuilt since the transactions are appended to the ledger pub-\nlicly upon veri\ufb01cation. P"
+      },
+      {
+        "paper_title": "hewa2020",
+        "page": 6,
+        "similarity": 0.4158,
+        "snippet": "tional-resource-intensive operations\non the Blockchain ecosystem. These operations include trans-\naction veri\ufb01cation and block generation, which include few\ncryptographic operations. Due to the resource restricted nature\nof IoT, there are certain lim"
+      }
+    ]
+  },
+  "step7_8": {
+    "expected_schema_keys": [
+      "research_coverage",
+      "common_themes",
+      "explicit_limitations",
+      "conflicting_findings",
+      "research_gaps",
+      "future_research_opportunities",
+      "potential_research_questions"
+    ],
+    "sample_prompt": "You are an academic intelligence analyzer.\nGiven the following paper evidence:\n[Source: Edge Computing and Blockchain | Page: 34]\n\"Resource constraints on edge nodes limit full blockchain consensus throughput.\"\n\nOutput a JSON object matching this schema:\n{\n  \"research_coverage\": \"summary of coverage\",\n  \"common_themes\": [\"theme 1\"],\n  \"explicit_limitations\": [\"limitation 1\"],\n  \"conflicting_findings\": [],\n  \"research_gaps\": [\n    {\n      \"gap\": \"gap description\",\n      \"type\": \"explicit\",\n      \"why_it_matters\": \"impact\",\n      \"supporting_papers\": [\"Edge Computing and Blockchain\"],\n      \"evidence\": [\"Resource constraints on edge nodes limit full blockchain consensus throughput.\"],\n      \"confidence\": \"high\"\n    }\n  ],\n  \"future_research_opportunities\": [\"opportunity 1\"],\n  \"potential_research_questions\": [\"question 1\"]\n}\n"
+  }
+}

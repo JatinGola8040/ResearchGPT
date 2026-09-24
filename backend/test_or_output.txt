@@ -1,0 +1,1 @@
+Edge computing is a distributed computing paradigm that processes data locally on devices or near the source of generation—rather than sending it to centralized cloud servers—to reduce latency, bandwidth usage, and improve real‑time responsiveness.

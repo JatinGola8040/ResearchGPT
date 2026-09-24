@@ -1,13 +1,26 @@
 import os
+from typing import Optional
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    GROQ_API_KEY: str = Field(..., description="Groq API Key loaded exclusively from .env")
+    OPENROUTER_API_KEY: str = Field(..., description="OpenRouter API Key loaded from .env")
+    LLM_PROVIDER: str = "openrouter"
+    LLM_MODEL: str = "openai/gpt-oss-120b"
+    LLM_TEMPERATURE: float = 0.2
+    LLM_MAX_TOKENS: int = 4096
+    LLM_TOP_P: float = 0.95
+    LLM_TIMEOUT: int = 60
+    OPENROUTER_SITE_URL: str = "http://localhost:3000"
+    OPENROUTER_SITE_NAME: str = "ResearchGPT"
+
     STORAGE_DIR: str = "./storage"
     DATABASE_URL: str = "sqlite:///./storage/research.db"
     CHROMA_DB_DIR: str = "./storage/chroma_db"
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+    
+    # Diagnostics / Development flag
+    DEBUG_MODE: bool = True
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"),

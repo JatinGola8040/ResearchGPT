@@ -1,6 +1,7 @@
 import os
 import shutil
 import uuid
+import logging
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -9,7 +10,8 @@ from app.database import get_db, SessionLocal
 from app.models import Paper
 from app.schemas import (
     PaperResponse, PaperSummaryResponse, ComparePapersRequest, ComparePapersResponse,
-    GapAnalysisRequest, GapAnalysisResponse, LiteratureReviewRequest, LiteratureReviewResponse
+    GapAnalysisRequest, GapAnalysisResponse, LiteratureReviewRequest, LiteratureReviewResponse,
+    IdeaValidationRequest, IdeaValidationResponse
 )
 from app.config import settings
 from app.services.pdf.pdf_parser import parse_pdf
@@ -20,6 +22,9 @@ from app.services.ai.summary_service import generate_paper_summary
 from app.services.ai.compare_service import generate_papers_comparison
 from app.services.ai.gap_service import generate_gap_analysis
 from app.services.ai.literature_service import generate_literature_review
+from app.services.ai.validator_service import generate_idea_validation
+
+logger = logging.getLogger("researchgpt.routers.papers")
 
 router = APIRouter(prefix="/papers", tags=["papers"])
 
@@ -35,6 +40,7 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
         return
 
     try:
+        logger.info(f"Starting ingestion pipeline for paper {paper_id} ({paper.filename})")
         # Step 1: Parse PDF
         parsed = parse_pdf(file_path)
         
@@ -51,16 +57,17 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
         embedded_chunks = generate_chunk_embeddings(processed.get("chunks", []))
         
         # Step 4: Store embeddings inside ChromaDB
-        vector_store_service.add_document(paper_id=paper_id, embedded_chunks=embedded_chunks)
+        stored_count = vector_store_service.add_document(paper_id=paper_id, embedded_chunks=embedded_chunks)
         
         # Step 5: Update paper status from processing to indexed
         paper.status = "indexed"
         db.commit()
+        logger.info(f"Successfully indexed paper {paper_id} with {stored_count} chunks.")
     except Exception as e:
         paper.status = "failed"
         paper.error_message = str(e)
         db.commit()
-        print(f"Ingestion pipeline failed for paper {paper_id}: {e}")
+        logger.error(f"Ingestion pipeline failed for paper {paper_id}: {e}")
     finally:
         db.close()
 
@@ -86,11 +93,9 @@ def process_paper_test(paper_id: str, db: Session = Depends(get_db)) -> Dict[str
         if meta.get("page_count"):
             paper.pages = str(meta.get("page_count"))
 
-        # Generate embeddings & store in ChromaDB
         embedded_chunks = generate_chunk_embeddings(processed.get("chunks", []))
         chunks_stored = vector_store_service.add_document(paper_id=paper.id, embedded_chunks=embedded_chunks)
 
-        # Update paper status from processing to indexed
         paper.status = "indexed"
         db.commit()
         db.refresh(paper)
@@ -157,7 +162,6 @@ def list_papers(db: Session = Depends(get_db)):
 def get_paper_summary(paper_id: str, db: Session = Depends(get_db)):
     """
     Feature 7: Retrieves representative chunks for a paper and generates structured AI summary.
-    Enforces consistent non-null JSON schema contract.
     """
     paper = db.query(Paper).filter(Paper.id == paper_id).first()
     if not paper:
@@ -190,19 +194,24 @@ def get_paper_summary(paper_id: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Summary generation failed for {paper_id}: {e}")
-        raise HTTPException(status_code=500, detail="Summary generation failed")
+        logger.error(f"Summary generation failed for {paper_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Summary generation failed: {str(e)}")
 
 @router.post("/compare", response_model=ComparePapersResponse, status_code=200)
 def compare_papers(req: ComparePapersRequest, db: Session = Depends(get_db)):
     """
-    Feature 8: Compares 2-5 uploaded papers based on representative chunks.
+    Feature 8: Compares uploaded papers based on representative chunks.
     """
-    if not (2 <= len(req.paper_ids) <= 5):
-        raise HTTPException(status_code=400, detail="Please select between 2 and 5 papers to compare.")
+    p_ids = req.paper_ids if req.paper_ids else []
+    if not p_ids:
+        indexed_papers = db.query(Paper).filter(Paper.status == "indexed").limit(3).all()
+        p_ids = [p.id for p in indexed_papers]
+    
+    if len(p_ids) < 1:
+        raise HTTPException(status_code=400, detail="Please upload and select papers to compare.")
 
     papers_meta = []
-    for pid in req.paper_ids:
+    for pid in p_ids:
         p = db.query(Paper).filter(Paper.id == pid).first()
         if not p:
             raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
@@ -223,25 +232,35 @@ def compare_papers(req: ComparePapersRequest, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Comparison generation failed: {e}")
-        raise HTTPException(status_code=500, detail="Comparison generation failed")
+        logger.error(f"Comparison generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Comparison generation failed: {str(e)}")
 
 @router.post("/gap-analysis", response_model=GapAnalysisResponse, status_code=200)
 def analyze_research_gaps(req: GapAnalysisRequest, db: Session = Depends(get_db)):
     """
-    Feature 9: Analyzes research gaps across 2-5 uploaded papers based on representative chunks.
+    Feature 9: Analyzes research gaps across uploaded papers using balanced per-paper evidence.
     """
-    if not (2 <= len(req.paper_ids) <= 5):
-        raise HTTPException(status_code=400, detail="Please select between 2 and 5 papers for gap analysis.")
+    p_ids = req.paper_ids if req.paper_ids else []
+    if not p_ids:
+        # Automatically use indexed papers if no explicit selection was passed
+        indexed_papers = db.query(Paper).filter(Paper.status == "indexed").limit(4).all()
+        p_ids = [p.id for p in indexed_papers]
+
+    if not p_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="No indexed research papers found. Please upload at least one PDF to perform gap analysis."
+        )
 
     papers_meta = []
-    for pid in req.paper_ids:
+    for pid in p_ids:
         p = db.query(Paper).filter(Paper.id == pid).first()
         if not p:
             raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
         papers_meta.append({"paper_id": str(p.id), "paper_title": str(p.title or "Untitled Paper")})
 
     try:
+        logger.info(f"Initiating gap analysis across {len(papers_meta)} papers")
         analysis_data = generate_gap_analysis(papers_meta)
         citations = analysis_data.pop("citations", [])
         if not isinstance(citations, list):
@@ -256,19 +275,24 @@ def analyze_research_gaps(req: GapAnalysisRequest, db: Session = Depends(get_db)
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Gap analysis generation failed: {e}")
-        raise HTTPException(status_code=500, detail="Gap analysis generation failed")
+        logger.error(f"Gap analysis generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Gap analysis generation failed: {str(e)}")
 
 @router.post("/literature-review", response_model=LiteratureReviewResponse, status_code=200)
 def create_literature_review(req: LiteratureReviewRequest, db: Session = Depends(get_db)):
     """
-    Feature 10: Generates structured academic literature review across 2-10 uploaded papers.
+    Feature 10: Generates structured academic literature review across uploaded papers.
     """
-    if not (2 <= len(req.paper_ids) <= 10):
-        raise HTTPException(status_code=400, detail="Please select between 2 and 10 papers for literature review.")
+    p_ids = req.paper_ids if req.paper_ids else []
+    if not p_ids:
+        indexed_papers = db.query(Paper).filter(Paper.status == "indexed").limit(5).all()
+        p_ids = [p.id for p in indexed_papers]
+
+    if not p_ids:
+        raise HTTPException(status_code=400, detail="Please upload and select papers for literature review.")
 
     papers_meta = []
-    for pid in req.paper_ids:
+    for pid in p_ids:
         p = db.query(Paper).filter(Paper.id == pid).first()
         if not p:
             raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
@@ -283,8 +307,55 @@ def create_literature_review(req: LiteratureReviewRequest, db: Session = Depends
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Literature review generation failed: {e}")
-        raise HTTPException(status_code=500, detail="Literature review generation failed")
+        logger.error(f"Literature review generation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Literature review generation failed: {str(e)}")
+
+@router.post("/validate-idea", response_model=IdeaValidationResponse, status_code=200)
+def validate_research_idea(req: IdeaValidationRequest, db: Session = Depends(get_db)):
+    if not req.research_idea or not req.research_idea.strip():
+        raise HTTPException(status_code=400, detail="Please provide a research idea to validate.")
+
+    p_ids = req.paper_ids if req.paper_ids else []
+    if not p_ids:
+        indexed_papers = db.query(Paper).filter(Paper.status == "indexed").limit(5).all()
+        p_ids = [p.id for p in indexed_papers]
+
+    if not p_ids:
+        raise HTTPException(
+            status_code=400,
+            detail="No indexed research papers found. Please upload at least one PDF before validating an idea."
+        )
+
+    papers_meta = []
+    for pid in p_ids:
+        paper = db.query(Paper).filter(Paper.id == pid).first()
+        if not paper:
+            raise HTTPException(status_code=404, detail=f"Paper with ID {pid} not found.")
+        if paper.status != "indexed":
+            raise HTTPException(status_code=400, detail=f'Paper "{paper.title or paper.filename}" is not indexed yet.')
+        papers_meta.append({"paper_id": str(paper.id), "paper_title": str(paper.title or "Untitled Paper")})
+
+    try:
+        validation_data = generate_idea_validation(
+            papers_meta,
+            IdeaValidationRequest(
+                paper_ids=p_ids,
+                research_idea=req.research_idea,
+                domain=req.domain,
+                target_problem=req.target_problem,
+                proposed_method=req.proposed_method,
+                constraints=req.constraints,
+            ),
+        )
+        validated = IdeaValidationResponse.model_validate(validation_data)
+        return validated.model_dump()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Idea validation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Idea validation failed: {str(e)}")
 
 @router.delete("/{paper_id}", status_code=200)
 def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
@@ -292,18 +363,16 @@ def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]
     if not paper:
         raise HTTPException(status_code=404, detail=f"Paper with ID {paper_id} not found.")
 
-    # Remove vector chunks from ChromaDB
     try:
         vector_store_service.delete_document(paper_id)
     except Exception as e:
-        print(f"Warning: Failed to delete ChromaDB vectors for {paper_id}: {e}")
+        logger.warning(f"Failed to delete ChromaDB vectors for {paper_id}: {e}")
 
-    # Remove file from disk
     if os.path.exists(paper.filepath):
         try:
             os.remove(paper.filepath)
         except Exception as e:
-            print(f"Warning: Failed to remove PDF file from disk: {e}")
+            logger.warning(f"Failed to remove PDF file from disk: {e}")
 
     db.delete(paper)
     db.commit()
