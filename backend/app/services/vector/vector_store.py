@@ -56,7 +56,8 @@ class VectorStoreService:
             metadatas.append({
                 "paper_id": str(paper_id),
                 "chunk_id": int(c_id),
-                "page": int(page)
+                "page": int(page),
+                "chunk_type": str(chunk.get("chunk_type", "content"))
             })
 
         if ids:

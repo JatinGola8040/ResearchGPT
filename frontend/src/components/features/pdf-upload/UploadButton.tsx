@@ -30,11 +30,11 @@ export function UploadButton() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
         onClick={() => fileInputRef.current?.click()}
-        className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold text-xs tracking-wide flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(56,189,248,0.35)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] transition-all cursor-pointer"
+        className="w-full py-3.5 px-4 rounded-xl bg-[#397F70] hover:bg-[#2C6659] text-white font-bold text-xs tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-md transition-all cursor-pointer"
       >
         <Upload className="w-4 h-4 animate-bounce" />
         <span>Upload PDF Manuscripts</span>
-        <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+        <Sparkles className="w-3.5 h-3.5 text-[#397F70]" />
       </motion.button>
     </>
   );

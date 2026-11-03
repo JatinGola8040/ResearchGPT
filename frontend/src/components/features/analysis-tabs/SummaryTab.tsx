@@ -52,10 +52,10 @@ export function SummaryTab() {
 
   if (!selectedPaperId) {
     return (
-      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
-        <FileText className="w-8 h-8 text-zinc-600 mb-3" />
-        <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1">Summary Synthesis</h3>
-        <p className="text-xs text-zinc-500 max-w-xs">
+      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-[#F4EFEC]/40">
+        <FileText className="w-8 h-8 text-[#585254] mb-3" />
+        <h3 className="text-xs font-bold text-[#251F21] uppercase tracking-wider mb-1">Summary Synthesis</h3>
+        <p className="text-xs text-[#585254] max-w-xs">
           Select an indexed manuscript from the left repository to inspect automated insights.
         </p>
       </div>
@@ -65,17 +65,17 @@ export function SummaryTab() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-60 space-y-3">
-        <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
-        <p className="text-xs font-mono text-zinc-400">Synthesizing executive briefing...</p>
+        <Loader2 className="w-6 h-6 text-[#397F70] animate-spin" />
+        <p className="text-xs font-mono text-[#585254]">Synthesizing executive briefing...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-60 space-y-3 p-6 text-center rounded-xl bg-red-500/10 border border-red-500/30">
-        <AlertCircle className="w-6 h-6 text-red-400" />
-        <p className="text-xs font-mono text-red-400">{error}</p>
+      <div className="flex flex-col items-center justify-center h-60 space-y-3 p-6 text-center rounded-xl bg-[#C3424D]/10 border border-[#C3424D]/30">
+        <AlertCircle className="w-6 h-6 text-[#C3424D]" />
+        <p className="text-xs font-mono text-[#C3424D]">{error}</p>
       </div>
     );
   }
@@ -84,26 +84,26 @@ export function SummaryTab() {
 
   return (
     <div className="space-y-4 pb-6">
-      <div className="p-4 rounded-xl bg-gradient-to-br from-[#131418] to-[#0B0C0E] border border-cyan-500/30 shadow-lg space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 uppercase tracking-wider">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+      <div className="p-4 rounded-xl bg-white border border-[#397F70]/30 shadow-lg space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#397F70] uppercase tracking-wider">
+          <Sparkles className="w-3.5 h-3.5 text-[#397F70]" />
           <span>Executive Synthesis</span>
         </div>
-        <p className="text-xs text-zinc-300 leading-relaxed font-serif italic border-l-2 border-cyan-500/60 pl-3">
+        <p className="text-xs text-[#251F21] leading-relaxed font-serif italic border-l-2 border-[#397F70]/60 pl-3">
           {summary.executive_summary}
         </p>
       </div>
 
       {summary.key_contributions && summary.key_contributions.length > 0 && (
-        <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
+        <div className="p-4 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] space-y-2.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#8469AE] uppercase tracking-wider">
             <CheckCircle className="w-3.5 h-3.5" />
             <span>Key Contributions</span>
           </div>
-          <ul className="space-y-2 text-xs text-zinc-300">
+          <ul className="space-y-2 text-xs text-[#251F21]">
             {summary.key_contributions.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2 bg-white/[0.02] p-2.5 rounded-lg border border-white/[0.04]">
-                <span className="text-purple-400 font-mono font-bold shrink-0">0{idx+1}.</span>
+              <li key={idx} className="flex items-start gap-2 bg-white p-2.5 rounded-lg border border-[#EAE9EA]">
+                <span className="text-[#8469AE] font-mono font-bold shrink-0">0{idx+1}.</span>
                 <span className="leading-relaxed">{item}</span>
               </li>
             ))}
@@ -111,28 +111,28 @@ export function SummaryTab() {
         </div>
       )}
 
-      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
+      <div className="p-4 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#397F70] uppercase tracking-wider">
           <Cpu className="w-3.5 h-3.5" />
           <span>Methodology</span>
         </div>
-        <p className="text-xs text-zinc-400 leading-relaxed">{summary.methodology}</p>
+        <p className="text-xs text-[#585254] leading-relaxed">{summary.methodology}</p>
       </div>
 
-      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+      <div className="p-4 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#23825A] uppercase tracking-wider">
           <BarChart2 className="w-3.5 h-3.5" />
           <span>Empirical Results</span>
         </div>
-        <p className="text-xs text-zinc-400 leading-relaxed">{summary.results}</p>
+        <p className="text-xs text-[#585254] leading-relaxed">{summary.results}</p>
       </div>
 
-      <div className="p-4 rounded-xl bg-[#131418] border border-white/[0.07] space-y-2">
-        <div className="flex items-center gap-2 text-xs font-bold text-pink-400 uppercase tracking-wider">
+      <div className="p-4 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] space-y-2">
+        <div className="flex items-center gap-2 text-xs font-bold text-[#8469AE] uppercase tracking-wider">
           <ShieldAlert className="w-3.5 h-3.5" />
           <span>Known Limitations</span>
         </div>
-        <p className="text-xs text-zinc-400 leading-relaxed">{summary.limitations}</p>
+        <p className="text-xs text-[#585254] leading-relaxed">{summary.limitations}</p>
       </div>
     </div>
   );

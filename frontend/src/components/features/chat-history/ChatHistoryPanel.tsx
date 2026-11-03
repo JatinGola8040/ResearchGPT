@@ -30,7 +30,7 @@ export function ChatHistoryPanel() {
     <div className="flex flex-col h-full bg-surface w-full shrink-0">
       <div className="p-4 space-y-4 border-b border-border">
         {/* New Chat Button */}
-        <button className="btn btn-primary w-full gap-2 py-3 shadow-[0_0_10px_rgba(14,165,233,0.2)] hover:shadow-[0_0_20px_rgba(14,165,233,0.4)]">
+        <button className="btn btn-primary w-full gap-2 py-3 shadow-md hover:shadow-md">
           <MessageSquarePlus className="w-4 h-4" />
           New Chat
         </button>

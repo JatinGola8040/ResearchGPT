@@ -236,6 +236,103 @@ class ExportRequest(BaseModel):
     type: str = Field(..., description="Export file type: pdf or docx")
     content: Dict[str, Any] = Field(..., description="The AI response dictionary to export.")
 
-class DebugGapAnalysisRequest(BaseModel):
-    query: Optional[str] = Field(default="Identify unresolved research gaps across papers")
+
+# ------------------------------------------------------------------
+# Visual Intelligence Features (Phase 1 + 3): graph, court, galaxy
+# ------------------------------------------------------------------
+
+class GraphNode(BaseModel):
+    paper_id: str
+    title: str
+    year: Optional[Any] = None
+    pages: str = ""
+    chunk_count: int = 0
+
+class GraphPassage(BaseModel):
+    paper_id: str = ""
+    paper_title: str = ""
+    page: Optional[Any] = 1
+    text: str = ""
+
+class EdgeClaim(BaseModel):
+    claim: str = ""
+    stance: str = "partial"
+    rationale: str = ""
+    passages: List[GraphPassage] = Field(default_factory=list)
+
+class ContradictionEdge(BaseModel):
+    id: str
+    source_paper_id: str
+    target_paper_id: str
+    claim: str = ""
+    claims: List[EdgeClaim] = Field(default_factory=list)
+    stance: str = "partial"
+    confidence: str = "medium"
+    passages: List[GraphPassage] = Field(default_factory=list)
+
+class ContradictionMapRequest(BaseModel):
     paper_ids: Optional[List[str]] = Field(default_factory=list)
+
+class ContradictionMapResponse(BaseModel):
+    nodes: List[GraphNode] = Field(default_factory=list)
+    edges: List[ContradictionEdge] = Field(default_factory=list)
+    claims_total: int = 0
+    generated_at: str = ""
+
+class EvidenceCourtRequest(BaseModel):
+    paper_ids: Optional[List[str]] = Field(default_factory=list)
+    claim: str = Field(..., min_length=10)
+
+class CourtPassage(BaseModel):
+    paper_id: str = ""
+    paper_title: str = ""
+    page: Optional[Any] = 1
+    text: str = ""
+    strength: str = "low"
+
+class VerdictSentence(BaseModel):
+    sentence: str = ""
+    tag: str = "contested"
+    source: Optional[GraphPassage] = None
+
+class Verdict(BaseModel):
+    label: str = "insufficient_evidence"
+    confidence: float = 0.0
+    sentences: List[VerdictSentence] = Field(default_factory=list)
+
+class EvidenceCourtResponse(BaseModel):
+    claim: str = ""
+    prosecution: List[CourtPassage] = Field(default_factory=list)
+    defense: List[CourtPassage] = Field(default_factory=list)
+    verdict: Verdict = Field(default_factory=Verdict)
+
+class GalaxyPoint(BaseModel):
+    paper_id: str
+    title: str
+    x: float
+    y: float
+    n_chunks: int = 0
+
+class GalaxyEdge(BaseModel):
+    source_paper_id: str
+    target_paper_id: str
+    similarity: float = 0.0
+
+class GalaxyCitationLink(BaseModel):
+    source_paper_id: str
+    target_paper_id: str
+
+class GalaxyResponse(BaseModel):
+    points: List[GalaxyPoint] = Field(default_factory=list)
+    edges: List[GalaxyEdge] = Field(default_factory=list)
+    citation_links: List[GalaxyCitationLink] = Field(default_factory=list)
+
+class GhostNode(BaseModel):
+    title: str
+    year: Optional[Any] = None
+    citation_count: Optional[Any] = None
+    url: Optional[str] = None
+    abstract: Optional[str] = None
+
+class GalaxyDiscoveryResponse(BaseModel):
+    ghost_nodes: List[GhostNode] = Field(default_factory=list)

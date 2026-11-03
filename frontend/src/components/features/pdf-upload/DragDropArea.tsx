@@ -53,23 +53,23 @@ export function DragDropArea() {
         onDrop={handleDrop}
         className={`border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 group relative overflow-hidden
           ${isDragging 
-            ? 'border-cyan-400 bg-cyan-500/20 scale-105 shadow-[0_0_30px_rgba(56,189,248,0.4)]' 
-            : 'border-white/[0.12] bg-[#131418]/80 hover:border-cyan-400/80 hover:bg-[#15161C] hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]'}
+            ? 'border-[#397F70] bg-[#397F70]/20 scale-105 shadow-md' 
+            : 'border-[#EAE9EA] bg-[#FBFCFC]/80 hover:border-[#397F70]/80 hover:bg-[#E8F2EE] hover:shadow-[0_8px_30px_rgba(0,0,0,0.6)]'}
         `}
       >
         <div className={`p-3 rounded-2xl mb-3 transition-all duration-300 border ${
           isDragging 
-            ? 'bg-cyan-500/30 border-cyan-400 text-cyan-200 scale-125 shadow-lg' 
-            : 'bg-white/[0.04] border-white/[0.08] text-zinc-400 group-hover:text-cyan-400 group-hover:border-cyan-500/40 group-hover:scale-110 group-hover:shadow-md'
+            ? 'bg-[#397F70]/30 border-[#397F70] text-[#397F70] scale-125 shadow-lg' 
+            : 'bg-white/[0.04] border-[#EAE9EA] text-[#585254] group-hover:text-[#397F70] group-hover:border-[#397F70]/40 group-hover:scale-110 group-hover:shadow-md'
         }`}>
           <FileUp className="w-6 h-6" />
         </div>
         
-        <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-200 group-hover:text-white transition-colors">
+        <div className="flex items-center gap-1.5 text-xs font-bold text-[#251F21] group-hover:text-[#251F21] transition-colors">
           <span>Drop PDF manuscripts here</span>
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
+          <Sparkles className="w-3.5 h-3.5 text-[#397F70] opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
         </div>
-        <p className="text-[10px] text-zinc-500 font-mono mt-1">or click to browse filesystem</p>
+        <p className="text-[10px] text-[#585254] font-mono mt-1">or click to browse filesystem</p>
       </motion.div>
     </>
   );

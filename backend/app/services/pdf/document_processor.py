@@ -100,3 +100,36 @@ def process_document(parsed_data: Dict[str, Any]) -> Dict[str, Any]:
         },
         "chunks": processed_chunks
     }
+
+def looks_like_bibliography(text: str) -> bool:
+    """
+    Shared bibliography heuristic: bracket-number citations, repeated DOIs or URLs.
+    Used by classify_chunk() at ingestion and kept in sync with retrieval filtering.
+    """
+    if not text:
+        return False
+    bracket_citations = re.findall(r'\[\d{1,3}\]', text)
+    if len(bracket_citations) >= 4:
+        return True
+    doi_matches = re.findall(r'doi:\s*10\.\d+', text, re.IGNORECASE)
+    url_matches = re.findall(r'https?://', text, re.IGNORECASE)
+    if len(doi_matches) >= 2 or len(url_matches) >= 3:
+        return True
+    return False
+
+_REFERENCE_HEADING_RE = re.compile(r'^\s*(references|bibliography|works cited)\s*$', re.IGNORECASE | re.MULTILINE)
+
+def classify_chunk(text: str, page_text: str = "") -> str:
+    """
+    Classifies a chunk as "content" or "references".
+    A chunk is "references" when it looks like a bibliography (shared heuristic)
+    or when its page carries a References/Bibliography heading near the top.
+    """
+    if looks_like_bibliography(text or ""):
+        return "references"
+    if page_text:
+        # Heading "near the top": within the first ~20% of the page text
+        head_zone = page_text[: max(1, len(page_text) // 5)]
+        if _REFERENCE_HEADING_RE.search(head_zone):
+            return "references"
+    return "content"

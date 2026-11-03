@@ -5,22 +5,22 @@ import { motion } from "framer-motion";
 
 export function Navbar() {
   return (
-    <header className="h-16 border-b border-white/[0.08] bg-[#030304]/70 backdrop-blur-2xl flex items-center justify-between px-6 shrink-0 z-50 sticky top-0 shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-all">
+    <header className="h-16 border-b border-[#EAE9EA] bg-[#F4EFEC]/90 backdrop-blur-2xl flex items-center justify-between px-6 shrink-0 z-50 sticky top-0 shadow-sm transition-all">
       {/* Left Brand Identity */}
       <div className="flex items-center gap-3.5">
         <motion.div 
           whileHover={{ rotate: 15, scale: 1.05 }}
           transition={{ type: "spring", stiffness: 300 }}
-          className="relative flex items-center justify-center p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 via-purple-500/15 to-transparent border border-white/[0.15] shadow-[0_0_20px_rgba(56,189,248,0.25)] cursor-pointer"
+          className="relative flex items-center justify-center p-2 rounded-xl bg-[#E8F2EE] border border-[#EAE9EA] shadow-md cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+          <Sparkles className="w-4 h-4 text-[#397F70] animate-pulse" />
         </motion.div>
         <div className="flex items-center gap-2.5">
-          <span className="font-black text-xl tracking-tight text-white font-sans drop-shadow-sm">
+          <span className="font-black text-xl tracking-tight text-[#251F21] font-sans drop-shadow-sm">
             Research<span className="neon-gradient-text font-extrabold">GPT</span>
           </span>
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-widest bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/10 border border-cyan-400/40 text-cyan-300 shadow-[0_0_12px_rgba(56,189,248,0.2)]">
-            <Zap className="w-2.5 h-2.5 text-cyan-400 fill-cyan-400 animate-bounce" /> STUDIO
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-widest bg-[#E8F2EE] border border-[#397F70]/40 text-[#397F70] shadow-md">
+            <Zap className="w-2.5 h-2.5 text-[#397F70] fill-cyan-400 animate-bounce" /> STUDIO
           </span>
         </div>
       </div>
@@ -28,15 +28,15 @@ export function Navbar() {
       {/* Right Controls & Pills */}
       <div className="flex items-center gap-4">
         {/* Cleaner Pill Component for Engine */}
-        <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#131418]/90 border border-white/[0.08] text-xs text-zinc-300 shadow-inner hover:border-white/[0.15] transition-all">
-          <Cpu className="w-3.5 h-3.5 text-purple-400" />
-          <span className="font-mono font-medium tracking-wide">gpt-OSS</span>
+        <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FBFCFC]/90 border border-[#EAE9EA] text-xs text-[#251F21] shadow-inner hover:border-[#EAE9EA] transition-all">
+          <Cpu className="w-3.5 h-3.5 text-[#8469AE]" />
+          <span className="font-mono font-medium tracking-wide">gemini-3.5-flash</span>
         </div>
 
         {/* Animated AI Ready Indicator Pill */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-mono font-semibold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute" />
-          <span className="w-2 h-2 rounded-full bg-emerald-400 relative shadow-[0_0_8px_#34d399]" />
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#23825A]/10 border border-[#23825A]/30 text-xs font-mono font-semibold text-[#23825A] shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+          <span className="w-2 h-2 rounded-full bg-[#23825A] animate-ping absolute" />
+          <span className="w-2 h-2 rounded-full bg-[#23825A] relative shadow-sm" />
           <span>AI Ready</span>
         </div>
 
@@ -47,7 +47,7 @@ export function Navbar() {
           <motion.button 
             whileHover={{ scale: 1.08, backgroundColor: "rgba(255,255,255,0.08)" }}
             whileTap={{ scale: 0.95 }}
-            className="p-2.5 rounded-xl text-zinc-400 hover:text-cyan-300 bg-white/[0.02] border border-transparent hover:border-white/[0.08] transition-all cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl text-[#585254] hover:text-[#397F70] bg-white border border-transparent hover:border-[#EAE9EA] transition-all cursor-pointer shadow-sm"
             title="Workspace Settings"
           >
             <Settings className="w-4 h-4" />
@@ -55,7 +55,7 @@ export function Navbar() {
           <motion.button 
             whileHover={{ scale: 1.08, backgroundColor: "rgba(255,255,255,0.08)" }}
             whileTap={{ scale: 0.95 }}
-            className="p-2.5 rounded-xl text-zinc-400 hover:text-purple-300 bg-white/[0.02] border border-transparent hover:border-white/[0.08] transition-all cursor-pointer shadow-sm"
+            className="p-2.5 rounded-xl text-[#585254] hover:text-[#8469AE] bg-white border border-transparent hover:border-[#EAE9EA] transition-all cursor-pointer shadow-sm"
             title="User Profile"
           >
             <User className="w-4 h-4" />

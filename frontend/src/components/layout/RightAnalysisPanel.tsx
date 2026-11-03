@@ -8,6 +8,7 @@ import { ResearchGapTab } from "../features/analysis-tabs/ResearchGapTab";
 import { LiteratureReviewTab } from "../features/analysis-tabs/LiteratureReviewTab";
 import { useUpload } from "../features/pdf-upload/UploadContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { HoverPopover } from "../ui/HoverPopover";
 
 type CitationItem = Record<string, unknown> | string;
 
@@ -29,6 +30,13 @@ const getSnippet = (cit: CitationItem): string => {
 const getPaperId = (cit: CitationItem): string | undefined => {
   if (typeof cit !== 'object' || cit === null) return undefined;
   return cit.paper_id ? String(cit.paper_id) : undefined;
+};
+
+const getRelevance = (cit: CitationItem): number => {
+  if (typeof cit !== 'object' || cit === null) return 0;
+  const raw = (cit as Record<string, unknown>).relevance_score;
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw ?? "0"));
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
 };
 
 export function RightAnalysisPanel() {
@@ -104,23 +112,23 @@ export function RightAnalysisPanel() {
       case 'citations':
         return (
           <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-gradient-to-br from-cyan-500/10 via-purple-500/5 to-transparent border border-white/[0.08] shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-semibold text-white">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="p-3.5 rounded-xl bg-[#E8F2EE] border border-[#EAE9EA] shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#251F21]">
+                <Sparkles className="w-3.5 h-3.5 text-[#397F70]" />
                 <span>AI Grounded References</span>
               </div>
-              <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
+              <p className="text-[11px] text-[#585254] mt-1 leading-relaxed">
                 Extracted citations and grounded snippets from your active AI intelligence session.
               </p>
             </div>
 
             {(!latestCitations || latestCitations.length === 0) ? (
-              <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
-                <Quote className="w-8 h-8 text-zinc-600 mb-3" />
-                <p className="text-xs font-medium text-zinc-400">
+              <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-[#F4EFEC]/40">
+                <Quote className="w-8 h-8 text-[#585254] mb-3" />
+                <p className="text-xs font-medium text-[#585254]">
                   No active citations recorded.
                 </p>
-                <p className="text-[11px] text-zinc-600 mt-0.5">
+                <p className="text-[11px] text-[#585254] mt-0.5">
                   Run an analysis or chat prompt to populate references.
                 </p>
               </div>
@@ -137,36 +145,54 @@ export function RightAnalysisPanel() {
                     <motion.div 
                       key={idx} 
                       whileHover={{ scale: 1.01 }}
-                      className="group rounded-xl bg-[#131418] border border-white/[0.07] p-4 space-y-3 hover:border-cyan-500/40 transition-all duration-200 hover:shadow-[0_4px_20px_rgba(0,0,0,0.6)]"
+                      className="group rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] p-4 space-y-3 hover:border-[#397F70]/40 transition-all duration-200 hover:shadow-md"
                     >
-                      <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2.5">
-                        <div className="font-medium text-xs text-zinc-200 flex items-center gap-1.5 line-clamp-1">
-                          <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">#{idx + 1}</span>
-                          <span className="font-semibold text-white">{title}</span>
-                        </div>
-                        <span className="text-[10px] font-mono bg-white/[0.05] border border-white/[0.08] text-zinc-300 px-2 py-0.5 rounded shrink-0">
+                      <div className="flex items-start justify-between gap-2 border-b border-[#EAE9EA] pb-2.5">
+                        <HoverPopover
+                          trigger={
+                            <span className="font-medium text-xs text-[#251F21] flex items-center gap-1.5 line-clamp-1 cursor-help">
+                              <span className="px-1.5 py-0.5 rounded bg-[#397F70]/20 text-[#397F70] font-mono text-[10px] font-bold">#{idx + 1}</span>
+                              <span className="font-semibold text-[#251F21] underline decoration-dotted decoration-[#397F70]/50 underline-offset-2">{title}</span>
+                            </span>
+                          }
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="font-semibold text-xs text-[#397F70] line-clamp-2">{title}</span>
+                              <span className="text-[10px] font-mono bg-[#FBFCFC] border border-[#EAE9EA] text-[#251F21] px-2 py-0.5 rounded shrink-0">Pg. {page}</span>
+                            </div>
+                            <p className="text-xs text-[#585254] leading-relaxed max-h-48 overflow-y-auto custom-scrollbar">{snippet}</p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1 rounded-full bg-[#F7F3F1] overflow-hidden">
+                                <div className="h-full rounded-full bg-[#397F70]" style={{ width: `${Math.round(getRelevance(cit) * 100)}%` }} />
+                              </div>
+                              <span className="text-[10px] font-mono text-[#585254]">{Math.round(getRelevance(cit) * 100)}%</span>
+                            </div>
+                          </div>
+                        </HoverPopover>
+                        <span className="text-[10px] font-mono bg-white/[0.05] border border-[#EAE9EA] text-[#251F21] px-2 py-0.5 rounded shrink-0">
                           Pg. {page}
                         </span>
                       </div>
 
-                      <div className="text-xs text-zinc-300 leading-relaxed pl-3 border-l-2 border-cyan-500/50 italic font-serif">
+                      <div className="text-xs text-[#251F21] leading-relaxed pl-3 border-l-2 border-[#397F70]/50 italic font-serif">
                         &quot;{snippet}&quot;
                       </div>
 
                       <div className="flex items-center justify-end gap-2 pt-1">
                         <button
                           onClick={() => handleViewPaper(title, paperId)}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-cyan-500/20 border border-white/[0.06] hover:border-cyan-500/40 text-[11px] font-medium text-zinc-300 hover:text-cyan-300 transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-[#397F70]/20 border border-[#EAE9EA] hover:border-[#397F70]/40 text-[11px] font-medium text-[#251F21] hover:text-[#397F70] transition-all cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" />
                           Inspect Source
                         </button>
                         <button
                           onClick={() => handleCopyCitation(cit, idx)}
-                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-purple-500/20 border border-white/[0.06] hover:border-purple-500/40 text-[11px] font-medium text-zinc-400 hover:text-purple-300 transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/[0.04] hover:bg-[#8469AE]/20 border border-[#EAE9EA] hover:border-[#8469AE]/40 text-[11px] font-medium text-[#585254] hover:text-[#8469AE] transition-all cursor-pointer"
                         >
-                          {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          {isCopied ? <span className="text-emerald-400">Copied</span> : "Copy"}
+                          {isCopied ? <Check className="w-3 h-3 text-[#23825A]" /> : <Copy className="w-3 h-3" />}
+                          {isCopied ? <span className="text-[#23825A]">Copied</span> : "Copy"}
                         </button>
                       </div>
                     </motion.div>
@@ -182,52 +208,52 @@ export function RightAnalysisPanel() {
   };
 
   return (
-    <aside className="w-80 h-full bg-[#0B0C0E] flex flex-col shrink-0 shadow-xl">
-      <div className="flex flex-col border-b border-white/[0.07] bg-[#030304]/60 backdrop-blur-md">
+    <aside className="w-80 h-full bg-white flex flex-col shrink-0 shadow-md">
+      <div className="flex flex-col border-b border-[#EAE9EA] bg-[#F4EFEC]/60 backdrop-blur-md">
         <div className="p-4 pb-3 flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-sm text-white tracking-wide flex items-center gap-2">
+            <h2 className="font-bold text-sm text-[#251F21] tracking-wide flex items-center gap-2">
               <span>Intelligence Drawer</span>
             </h2>
-            <p className="text-[11px] text-zinc-400 mt-0.5">Synthesize and evaluate literature.</p>
+            <p className="text-[11px] text-[#585254] mt-0.5">Synthesize and evaluate literature.</p>
           </div>
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shadow-[0_0_8px_#38bdf8]" />
+          <span className="w-2 h-2 rounded-full bg-[#397F70] animate-ping shadow-[0_0_8px_#397F70]" />
         </div>
 
         {/* Executive Dashboard Metrics Grid */}
         <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
-          <div className="p-2 rounded-lg bg-[#131418]/80 border border-white/[0.06] flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+          <div className="p-2 rounded-lg bg-[#FBFCFC]/80 border border-[#EAE9EA] flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#23825A] shrink-0" />
             <div className="overflow-hidden">
-              <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Confidence</div>
-              <div className="text-xs font-bold font-mono text-white">96% High</div>
+              <div className="text-[10px] font-mono text-[#585254] uppercase tracking-wider">Confidence</div>
+              <div className="text-xs font-bold font-mono text-[#251F21]">96% High</div>
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-[#131418]/80 border border-white/[0.06] flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-cyan-400 shrink-0" />
+          <div className="p-2 rounded-lg bg-[#FBFCFC]/80 border border-[#EAE9EA] flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-[#397F70] shrink-0" />
             <div className="overflow-hidden">
-              <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Score</div>
-              <div className="text-xs font-bold font-mono text-white">94 / 100</div>
+              <div className="text-[10px] font-mono text-[#585254] uppercase tracking-wider">Score</div>
+              <div className="text-xs font-bold font-mono text-[#251F21]">94 / 100</div>
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-[#131418]/80 border border-white/[0.06] flex items-center gap-2">
-            <Activity className="w-4 h-4 text-purple-400 shrink-0" />
+          <div className="p-2 rounded-lg bg-[#FBFCFC]/80 border border-[#EAE9EA] flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[#8469AE] shrink-0" />
             <div className="overflow-hidden">
-              <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Density</div>
-              <div className="text-xs font-bold font-mono text-white">Vector 768d</div>
+              <div className="text-[10px] font-mono text-[#585254] uppercase tracking-wider">Density</div>
+              <div className="text-xs font-bold font-mono text-[#251F21]">Vector 768d</div>
             </div>
           </div>
-          <div className="p-2 rounded-lg bg-[#131418]/80 border border-white/[0.06] flex items-center gap-2">
-            <Layers className="w-4 h-4 text-pink-400 shrink-0" />
+          <div className="p-2 rounded-lg bg-[#FBFCFC]/80 border border-[#EAE9EA] flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#8469AE] shrink-0" />
             <div className="overflow-hidden">
-              <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Sources</div>
-              <div className="text-xs font-bold font-mono text-white">{papers.length} Indexed</div>
+              <div className="text-[10px] font-mono text-[#585254] uppercase tracking-wider">Sources</div>
+              <div className="text-xs font-bold font-mono text-[#251F21]">{papers.length} Indexed</div>
             </div>
           </div>
         </div>
         
         {/* Sleek Horizontal Tab Bar */}
-        <div className="flex overflow-x-auto no-scrollbar px-2 pt-1 border-t border-white/[0.05]">
+        <div className="flex overflow-x-auto no-scrollbar px-2 pt-1 border-t border-[#EAE9EA]">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -236,11 +262,11 @@ export function RightAnalysisPanel() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-mono whitespace-nowrap border-b-2 transition-all duration-200 cursor-pointer ${
                   isActive 
-                    ? 'border-cyan-400 text-cyan-300 font-bold bg-cyan-500/10 rounded-t-lg' 
-                    : 'border-transparent text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] rounded-t-lg'
+                    ? 'border-[#397F70] text-[#397F70] font-bold bg-[#397F70]/10 rounded-t-lg' 
+                    : 'border-transparent text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04] rounded-t-lg'
                 }`}
               >
-                <tab.icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-400' : ''}`} />
+                <tab.icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#397F70]' : ''}`} />
                 {tab.label}
               </button>
             );
@@ -248,7 +274,7 @@ export function RightAnalysisPanel() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 no-scrollbar bg-[#030304]/20 relative">
+      <div className="flex-1 overflow-y-auto p-4 no-scrollbar bg-[#F4EFEC]/20 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

@@ -26,8 +26,8 @@ export function UploadProgress() {
           <div className="relative z-10 flex items-start gap-3">
             <div className="mt-0.5 shrink-0">
               {item.state === 'uploading' && <Loader2 className="w-4 h-4 text-primary animate-spin" />}
-              {item.state === 'completed' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-              {item.state === 'failed' && <AlertCircle className="w-4 h-4 text-red-400" />}
+              {item.state === 'completed' && <CheckCircle2 className="w-4 h-4 text-[#23825A]" />}
+              {item.state === 'failed' && <AlertCircle className="w-4 h-4 text-[#C3424D]" />}
             </div>
             
             <div className="flex-1 min-w-0">
@@ -54,11 +54,11 @@ export function UploadProgress() {
               )}
               
               {item.state === 'failed' && (
-                <p className="text-xs text-red-400 mt-1">{item.errorMessage}</p>
+                <p className="text-xs text-[#C3424D] mt-1">{item.errorMessage}</p>
               )}
               
               {item.state === 'completed' && (
-                <p className="text-xs text-emerald-400 mt-1">Upload complete</p>
+                <p className="text-xs text-[#23825A] mt-1">Upload complete</p>
               )}
             </div>
           </div>

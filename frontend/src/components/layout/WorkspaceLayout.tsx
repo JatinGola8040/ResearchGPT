@@ -14,7 +14,7 @@ export function WorkspaceLayout() {
 
   return (
     <UploadProvider>
-      <div className="flex flex-col h-screen w-full bg-[#030304] overflow-hidden text-foreground selection:bg-cyan-500/30 selection:text-cyan-200">
+      <div className="flex flex-col h-screen w-full bg-[#F4EFEC] overflow-hidden text-foreground selection:bg-[#397F70]/30 selection:text-[#397F70]">
         <Navbar />
         <div className="flex flex-1 overflow-hidden relative">
           <LeftSidebar />
@@ -27,7 +27,7 @@ export function WorkspaceLayout() {
               whileHover={{ scale: 1.1, backgroundColor: "rgba(19, 20, 24, 1)" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-              className="absolute -left-4 z-50 w-7 h-14 bg-[#131418]/90 backdrop-blur-xl border border-white/[0.15] hover:border-cyan-400/80 rounded-full flex items-center justify-center text-zinc-400 hover:text-cyan-300 shadow-[0_0_20px_rgba(0,0,0,0.9)] transition-all cursor-pointer group"
+              className="absolute -left-4 z-50 w-7 h-14 bg-[#FBFCFC]/90 backdrop-blur-xl border border-[#EAE9EA] hover:border-[#397F70]/80 rounded-full flex items-center justify-center text-[#585254] hover:text-[#397F70] shadow-md transition-all cursor-pointer group"
               title={isDrawerOpen ? "Collapse Intelligence Console" : "Expand Intelligence Console"}
             >
               {isDrawerOpen ? (
@@ -43,7 +43,7 @@ export function WorkspaceLayout() {
             initial={false}
             animate={{ width: isDrawerOpen ? 320 : 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="overflow-hidden relative shrink-0 z-30 border-l border-white/[0.08] bg-[#0B0C0E] shadow-2xl"
+            className="overflow-hidden relative shrink-0 z-30 border-l border-[#EAE9EA] bg-white shadow-md"
           >
             <div className="w-80 h-full">
               <RightAnalysisPanel />

@@ -114,5 +114,38 @@ export const api = {
       throw new Error(`Export generation failed (${response.status})`);
     }
     return response.blob();
+  },
+
+  getContradictionMap: async (paperIds: string[]) => {
+    const response = await fetch(`${API_URL}/papers/contradiction-map`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_ids: paperIds }),
+    });
+    return handleResponse(response, "Failed to build the contradiction map");
+  },
+
+  runEvidenceCourt: async (paperIds: string[], claim: string) => {
+    const response = await fetch(`${API_URL}/papers/evidence-court`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ paper_ids: paperIds, claim }),
+    });
+    return handleResponse(response, "Failed to run the evidence court");
+  },
+
+  getGalaxy: async () => {
+    const response = await fetch(`${API_URL}/papers/galaxy`);
+    return handleResponse(response, "Failed to build the paper galaxy");
+  },
+
+  getGalaxyDiscovery: async (paperId: string) => {
+    const response = await fetch(`${API_URL}/papers/galaxy/discovery?paper_id=${encodeURIComponent(paperId)}`);
+    return handleResponse(response, "Discovery service unavailable");
   }
 };
+

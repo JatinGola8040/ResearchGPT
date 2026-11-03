@@ -4,9 +4,11 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    OPENROUTER_API_KEY: str = Field(..., description="OpenRouter API Key loaded from .env")
+    OPENROUTER_API_KEY: str = Field(default="", description="OpenRouter API Key loaded from .env; empty means LLM endpoints report a clean config error instead of crashing the app")
+    GEMINI_API_KEY: str = Field(default="", description="Google Gemini API key (AI Studio free tier); when set, Gemini is the primary LLM and OpenRouter is the fallback")
+    GEMINI_MODEL: str = "gemini-3.5-flash"
     LLM_PROVIDER: str = "openrouter"
-    LLM_MODEL: str = "openai/gpt-oss-120b"
+    LLM_MODEL: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
     LLM_TEMPERATURE: float = 0.2
     LLM_MAX_TOKENS: int = 4096
     LLM_TOP_P: float = 0.95

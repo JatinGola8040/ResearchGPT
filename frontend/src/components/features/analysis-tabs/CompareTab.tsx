@@ -28,19 +28,19 @@ function ExpandableSection({ title, contentKey, content, isExpanded, onToggle }:
   if (!content) return null;
   
   return (
-    <div className="rounded-xl bg-[#131418] border border-white/[0.07] overflow-hidden transition-all duration-200 hover:border-white/[0.15]">
+    <div className="rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] overflow-hidden transition-all duration-200 hover:border-[#EAE9EA]">
       <button 
         onClick={() => onToggle(contentKey)}
-        className="w-full flex items-center justify-between p-4 text-left bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between p-4 text-left bg-white hover:bg-black/[0.04] transition-colors cursor-pointer"
       >
-        <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+        <span className="text-xs font-mono font-bold text-[#397F70] uppercase tracking-wider flex items-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-[#397F70]" />
           {title}
         </span>
-        {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+        {isExpanded ? <ChevronUp className="w-4 h-4 text-[#585254]" /> : <ChevronDown className="w-4 h-4 text-[#585254]" />}
       </button>
       {isExpanded && (
-        <div className="p-4 border-t border-white/[0.06] bg-black/20">
+        <div className="p-4 border-t border-[#EAE9EA] bg-white">
           <MarkdownRenderer content={content} className="text-xs" />
         </div>
       )}
@@ -101,10 +101,10 @@ export function CompareTab() {
 
   if (papers.length < 2) {
     return (
-      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
-        <GitCompare className="w-8 h-8 text-zinc-600 mb-3" />
-        <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1">Comparative Matrix</h3>
-        <p className="text-xs text-zinc-500 max-w-xs">
+      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-[#F4EFEC]/40">
+        <GitCompare className="w-8 h-8 text-[#585254] mb-3" />
+        <h3 className="text-xs font-bold text-[#251F21] uppercase tracking-wider mb-1">Comparative Matrix</h3>
+        <p className="text-xs text-[#585254] max-w-xs">
           Index at least 2 PDF manuscripts to activate cross-document delta analysis.
         </p>
       </div>
@@ -116,10 +116,10 @@ export function CompareTab() {
       {/* Paper Selection UI */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-[11px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+          <h3 className="text-[11px] font-mono font-bold text-[#585254] uppercase tracking-wider">
             SELECT TARGET DOCUMENTS (2-5)
           </h3>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#397F70]/10 text-[#397F70] border border-[#397F70]/20">
             {selectedIds.length} SELECTED
           </span>
         </div>
@@ -134,14 +134,14 @@ export function CompareTab() {
                 onClick={() => !isDisabled && handleCheckboxChange(paper.id)}
                 className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                   isSelected 
-                    ? 'bg-cyan-500/15 border-cyan-400/60 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-white' 
+                    ? 'bg-[#E8F2EE] border-[#397F70]/60 shadow-sm text-[#397F70]' 
                     : isDisabled
-                    ? 'bg-[#131418]/40 border-white/[0.04] opacity-50 cursor-not-allowed text-zinc-500'
-                    : 'bg-[#131418] border-white/[0.07] hover:border-white/20 text-zinc-300 hover:text-white'
+                    ? 'bg-[#FBFCFC]/40 border-[#EAE9EA] opacity-50 cursor-not-allowed text-[#585254]'
+                    : 'bg-[#FBFCFC] border-[#EAE9EA] hover:border-[#EAE9EA] text-[#251F21] hover:text-[#251F21]'
                 }`}
               >
-                <div className="mt-0.5 text-cyan-400 shrink-0">
-                  {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-zinc-600" />}
+                <div className="mt-0.5 text-[#397F70] shrink-0">
+                  {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-[#585254]" />}
                 </div>
                 <span className="text-xs font-medium line-clamp-2 leading-snug">{paper.title}</span>
               </div>
@@ -152,7 +152,7 @@ export function CompareTab() {
         <button 
           onClick={handleCompare}
           disabled={selectedIds.length < 2 || selectedIds.length > 5 || isLoading}
-          className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 disabled:opacity-40 disabled:hover:from-cyan-500 disabled:hover:to-purple-600 text-white font-mono font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(56,189,248,0.25)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] cursor-pointer disabled:cursor-not-allowed disabled:shadow-none"
+          className="w-full py-3 bg-[#397F70] hover:bg-[#2C6659] disabled:opacity-40 disabled:hover:bg-[#397F70] text-white font-mono font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-md cursor-pointer disabled:cursor-not-allowed disabled:shadow-none"
         >
           {isLoading ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> SYNTHESIZING DELTAS...</>
@@ -164,16 +164,16 @@ export function CompareTab() {
 
       {/* Loading & Error States */}
       {error && (
-        <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center border border-red-500/30 bg-red-500/10 rounded-xl">
-          <AlertCircle className="w-6 h-6 text-red-400" />
-          <p className="text-xs font-mono text-red-400">{error}</p>
+        <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center border border-[#C3424D]/30 bg-[#C3424D]/10 rounded-xl">
+          <AlertCircle className="w-6 h-6 text-[#C3424D]" />
+          <p className="text-xs font-mono text-[#C3424D]">{error}</p>
         </div>
       )}
 
       {!compareData && !isLoading && !error && (
-        <div className="rounded-xl flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.08] bg-black/20">
-          <GitCompare className="w-8 h-8 text-zinc-600 mb-2" />
-          <p className="text-xs text-zinc-500 font-mono">
+        <div className="rounded-xl flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-white">
+          <GitCompare className="w-8 h-8 text-[#585254] mb-2" />
+          <p className="text-xs text-[#585254] font-mono">
             Select sources above and trigger generation to evaluate methodologies.
           </p>
         </div>

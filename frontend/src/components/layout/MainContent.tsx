@@ -5,66 +5,100 @@ import { WelcomeState } from "../features/upload-workspace/WelcomeState";
 import { PaperDetails } from "../features/upload-workspace/PaperDetails";
 import { AIChat } from "../features/ai-chat/AIChat";
 import { IdeaValidatorTab } from "../features/analysis-tabs/IdeaValidatorTab";
-import { FileText, MessageSquare, Sparkles, FlaskConical } from "lucide-react";
+import { ContradictionMapView } from "../features/contradiction-map/ContradictionMapView";
+import { EvidenceCourtView } from "../features/evidence-court/EvidenceCourtView";
+import { PaperGalaxyView } from "../features/paper-galaxy/PaperGalaxyView";
+import { useUpload } from "../features/pdf-upload/UploadContext";
+import { FileText, MessageSquare, Sparkles, FlaskConical, Waypoints, Scale, Orbit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ViewState = 'welcome' | 'document' | 'chat' | 'ideas';
+type ViewState = 'welcome' | 'document' | 'chat' | 'ideas' | 'map' | 'court' | 'galaxy';
 
 export function MainContent() {
   const [viewState, setViewState] = useState<ViewState>('chat');
+  const { setSelectedPaperId } = useUpload();
+
+  const openInInspector = (paperId: string) => {
+    setSelectedPaperId(paperId);
+    setViewState('document');
+  };
+
+  const capsuleBtn = (active: boolean) =>
+    `px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
+      active
+        ? 'bg-[#E8F2EE] text-[#397F70] border border-[#397F70]/30 font-semibold'
+        : 'text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04]'
+    }`;
 
   return (
-    <main className="flex-1 flex flex-col bg-[#030304] relative h-full border-r border-white/[0.07] overflow-hidden">
-      {/* Ambient Animated Lighting Glows */}
-      <div className="ambient-glow-cyan top-10 left-[15%] z-0" />
-      <div className="ambient-glow-purple bottom-10 right-[15%] z-0" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[150px] bg-gradient-to-b from-cyan-500/10 via-purple-500/5 to-transparent blur-3xl pointer-events-none z-0" />
+    <main className="flex-1 flex flex-col bg-[#F4EFEC] relative h-full border-r border-[#EAE9EA] overflow-hidden">
 
       {/* Centered Floating Command Capsule */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center p-1 gap-1 rounded-full bg-[#0B0C0E]/90 backdrop-blur-xl border border-white/[0.1] shadow-[0_4px_25px_rgba(0,0,0,0.8)]">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center p-1 gap-1 rounded-full bg-white border border-[#EAE9EA] shadow-[0_1px_2px_rgba(37,31,33,0.06),0_8px_24px_rgba(37,31,33,0.08)]">
          <button 
            onClick={() => setViewState('welcome')}
            className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
              viewState === 'welcome' 
-               ? 'bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 text-white border border-white/[0.2] shadow-[0_0_15px_rgba(56,189,248,0.25)] font-semibold' 
-               : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+               ? 'bg-[#E8F2EE] text-[#397F70] border border-[#397F70]/30 font-semibold' 
+               : 'text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04]'
            }`}
          >
-           <Sparkles className={`w-3.5 h-3.5 ${viewState === 'welcome' ? 'text-cyan-400' : ''}`} />
+           <Sparkles className={`w-3.5 h-3.5 ${viewState === 'welcome' ? 'text-[#397F70]' : ''}`} />
            Overview
          </button>
          <button 
            onClick={() => setViewState('document')}
            className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
              viewState === 'document' 
-               ? 'bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 text-white border border-white/[0.2] shadow-[0_0_15px_rgba(56,189,248,0.25)] font-semibold' 
-               : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+               ? 'bg-[#E8F2EE] text-[#397F70] border border-[#397F70]/30 font-semibold' 
+               : 'text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04]'
            }`}
          >
-           <FileText className={`w-3.5 h-3.5 ${viewState === 'document' ? 'text-cyan-400' : ''}`} />
+           <FileText className={`w-3.5 h-3.5 ${viewState === 'document' ? 'text-[#397F70]' : ''}`} />
            Inspector
          </button>
          <button 
            onClick={() => setViewState('chat')}
            className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
              viewState === 'chat' 
-               ? 'bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 text-white border border-white/[0.2] shadow-[0_0_15px_rgba(168,85,247,0.25)] font-semibold' 
-               : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+               ? 'bg-[#E8F2EE] text-[#397F70] border border-[#397F70]/30 font-semibold' 
+               : 'text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04]'
            }`}
          >
-           <MessageSquare className={`w-3.5 h-3.5 ${viewState === 'chat' ? 'text-purple-400' : ''}`} />
+           <MessageSquare className={`w-3.5 h-3.5 ${viewState === 'chat' ? 'text-[#397F70]' : ''}`} />
            Studio Chat
          </button>
          <button 
            onClick={() => setViewState('ideas')}
            className={`px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 transition-all duration-200 cursor-pointer ${
              viewState === 'ideas' 
-               ? 'bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 text-white border border-white/[0.2] shadow-[0_0_15px_rgba(236,72,153,0.25)] font-semibold' 
-               : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+               ? 'bg-[#E8F2EE] text-[#397F70] border border-[#397F70]/30 font-semibold' 
+               : 'text-[#585254] hover:text-[#251F21] hover:bg-black/[0.04]'
            }`}
          >
-           <FlaskConical className={`w-3.5 h-3.5 ${viewState === 'ideas' ? 'text-pink-400' : ''}`} />
+           <FlaskConical className={`w-3.5 h-3.5 ${viewState === 'ideas' ? 'text-[#397F70]' : ''}`} />
            Ideas
+         </button>
+         <button
+           onClick={() => setViewState('map')}
+           className={capsuleBtn(viewState === 'map')}
+         >
+           <Waypoints className={`w-3.5 h-3.5 ${viewState === 'map' ? 'text-[#397F70]' : ''}`} />
+           Map
+         </button>
+         <button
+           onClick={() => setViewState('court')}
+           className={capsuleBtn(viewState === 'court')}
+         >
+           <Scale className={`w-3.5 h-3.5 ${viewState === 'court' ? 'text-[#397F70]' : ''}`} />
+           Court
+         </button>
+         <button
+           onClick={() => setViewState('galaxy')}
+           className={capsuleBtn(viewState === 'galaxy')}
+         >
+           <Orbit className={`w-3.5 h-3.5 ${viewState === 'galaxy' ? 'text-[#397F70]' : ''}`} />
+           Galaxy
          </button>
       </div>
 
@@ -80,6 +114,15 @@ export function MainContent() {
         </div>
         <div className={`flex-1 overflow-y-auto px-6 pt-20 pb-10 custom-scrollbar max-w-4xl mx-auto w-full ${viewState === 'ideas' ? 'block' : 'hidden'}`}>
           <IdeaValidatorTab />
+        </div>
+        <div className={`flex-1 flex flex-col h-full overflow-hidden ${viewState === 'map' ? 'flex' : 'hidden'}`}>
+          <ContradictionMapView />
+        </div>
+        <div className={`flex-1 flex flex-col h-full overflow-hidden ${viewState === 'court' ? 'flex' : 'hidden'}`}>
+          <EvidenceCourtView />
+        </div>
+        <div className={`flex-1 flex flex-col h-full overflow-hidden ${viewState === 'galaxy' ? 'flex' : 'hidden'}`}>
+          <PaperGalaxyView onOpenInInspector={openInInspector} />
         </div>
       </div>
     </main>

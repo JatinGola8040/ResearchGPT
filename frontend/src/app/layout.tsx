@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ResearchGPT Studio - AI Academic Research Assistant",
-  description: "Advanced multi-paper synthesis and grounded literature intelligence powered by gpt-oss-120b.",
+  description: "Advanced multi-paper synthesis and grounded literature intelligence powered by Gemini 3.5 Flash (free tier, OpenRouter fallback).",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className="antialiased bg-[#030304] text-white min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200"
+        className="antialiased bg-[#F4EFEC] text-[#251F21] min-h-screen selection:bg-[#397F70]/20 selection:text-[#251F21]"
       >
         {children}
       </body>

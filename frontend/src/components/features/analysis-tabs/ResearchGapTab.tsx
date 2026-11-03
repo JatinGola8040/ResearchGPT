@@ -5,7 +5,7 @@ import { useUpload } from "../pdf-upload/UploadContext";
 import { api } from "../../../lib/api";
 import { 
   Loader2, AlertCircle, Lightbulb, ChevronDown, ChevronUp, Sparkles, 
-  CheckSquare, Square, ShieldCheck, Target, HelpCircle, Layers, CheckCircle2
+  CheckSquare, Square, ShieldCheck, Target, HelpCircle, Layers, CheckCircle2, LayoutGrid, List
 } from "lucide-react";
 import { MarkdownRenderer } from "../../ui/MarkdownRenderer";
 
@@ -52,24 +52,24 @@ function ExpandableGapSection({ title, contentKey, content, isExpanded, onToggle
   const displayContent = hasContent ? content : "Evidence is limited in the current corpus.";
   
   return (
-    <div className="rounded-xl bg-[#131418] border border-white/[0.07] overflow-hidden transition-all duration-200 hover:border-white/[0.15]">
+    <div className="rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] overflow-hidden transition-all duration-200 hover:border-[#EAE9EA]">
       <button 
         onClick={() => onToggle(contentKey)}
-        className="w-full flex items-center justify-between p-4 text-left bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between p-4 text-left bg-white hover:bg-black/[0.04] transition-colors cursor-pointer"
       >
-        <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-2">
-          {icon || <Sparkles className="w-3.5 h-3.5 text-cyan-400" />}
+        <span className="text-xs font-mono font-bold text-[#397F70] uppercase tracking-wider flex items-center gap-2">
+          {icon || <Sparkles className="w-3.5 h-3.5 text-[#397F70]" />}
           {title}
         </span>
-        {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+        {isExpanded ? <ChevronUp className="w-4 h-4 text-[#585254]" /> : <ChevronDown className="w-4 h-4 text-[#585254]" />}
       </button>
       {isExpanded && (
-        <div className="p-4 border-t border-white/[0.06] bg-black/20">
+        <div className="p-4 border-t border-[#EAE9EA] bg-white">
           {Array.isArray(displayContent) ? (
             <ul className="space-y-2">
               {displayContent.map((item, idx) => (
-                <li key={idx} className="text-xs text-zinc-300 leading-relaxed flex items-start gap-2.5 bg-white/[0.02] p-2.5 rounded-lg border border-white/[0.03]">
-                  <span className="text-cyan-400 font-mono font-bold shrink-0">0{idx+1}.</span>
+                <li key={idx} className="text-xs text-[#251F21] leading-relaxed flex items-start gap-2.5 bg-white p-2.5 rounded-lg border border-[#EAE9EA]">
+                  <span className="text-[#397F70] font-mono font-bold shrink-0">0{idx+1}.</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -90,6 +90,8 @@ export function ResearchGapTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  const [gapViewMode, setGapViewMode] = useState<'list' | 'grid'>('list');
+  const [expandedGridChip, setExpandedGridChip] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     coverage: true,
     detailedGaps: true,
@@ -168,10 +170,10 @@ export function ResearchGapTab() {
 
   if (papers.length === 0) {
     return (
-      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.1] bg-[#030304]/40">
-        <Lightbulb className="w-8 h-8 text-zinc-600 mb-3" />
-        <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1">Gap Detection Engine</h3>
-        <p className="text-xs text-zinc-500 max-w-xs">
+      <div className="rounded-xl h-60 flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-[#F4EFEC]/40">
+        <Lightbulb className="w-8 h-8 text-[#585254] mb-3" />
+        <h3 className="text-xs font-bold text-[#251F21] uppercase tracking-wider mb-1">Gap Detection Engine</h3>
+        <p className="text-xs text-[#585254] max-w-xs">
           Upload and index research manuscripts to uncover unexplored trajectories and conflicting empirical findings.
         </p>
       </div>
@@ -187,12 +189,12 @@ export function ResearchGapTab() {
       {/* Paper Selection UI */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-[11px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+          <h3 className="text-[11px] font-mono font-bold text-[#585254] uppercase tracking-wider">
             SELECT TARGET DOCUMENTS ({selectedIds.length}/{papers.length})
           </h3>
           <button 
             onClick={handleSelectAll}
-            className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 cursor-pointer transition-colors"
+            className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#397F70]/10 hover:bg-[#397F70]/20 text-[#397F70] border border-[#397F70]/20 cursor-pointer transition-colors"
           >
             {selectedIds.length === papers.length ? "DESELECT ALL" : "SELECT ALL"}
           </button>
@@ -208,14 +210,14 @@ export function ResearchGapTab() {
                 onClick={() => !isDisabled && handleCheckboxChange(paper.id)}
                 className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                   isSelected 
-                    ? 'bg-cyan-500/15 border-cyan-400/60 shadow-[0_0_15px_rgba(56,189,248,0.15)] text-white' 
+                    ? 'bg-[#E8F2EE] border-[#397F70]/60 shadow-sm text-[#397F70]' 
                     : isDisabled
-                    ? 'bg-[#131418]/40 border-white/[0.04] opacity-50 cursor-not-allowed text-zinc-500'
-                    : 'bg-[#131418] border-white/[0.07] hover:border-white/20 text-zinc-300 hover:text-white'
+                    ? 'bg-[#FBFCFC]/40 border-[#EAE9EA] opacity-50 cursor-not-allowed text-[#585254]'
+                    : 'bg-[#FBFCFC] border-[#EAE9EA] hover:border-[#EAE9EA] text-[#251F21] hover:text-[#251F21]'
                 }`}
               >
-                <div className="mt-0.5 text-cyan-400 shrink-0">
-                  {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-zinc-600" />}
+                <div className="mt-0.5 text-[#397F70] shrink-0">
+                  {isSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-[#585254]" />}
                 </div>
                 <span className="text-xs font-medium line-clamp-2 leading-snug">{paper.title}</span>
               </div>
@@ -226,7 +228,7 @@ export function ResearchGapTab() {
         <button 
           onClick={handleAnalyze}
           disabled={selectedIds.length === 0 || isLoading}
-          className="w-full py-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 disabled:opacity-40 disabled:hover:from-cyan-500 disabled:hover:to-purple-600 text-white font-mono font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(56,189,248,0.25)] hover:shadow-[0_0_25px_rgba(56,189,248,0.5)] cursor-pointer disabled:cursor-not-allowed disabled:shadow-none"
+          className="w-full py-3 bg-[#397F70] hover:bg-[#2C6659] disabled:opacity-40 disabled:hover:bg-[#397F70] text-white font-mono font-bold rounded-xl text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-md cursor-pointer disabled:cursor-not-allowed disabled:shadow-none"
         >
           {isLoading ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> ANALYZING {selectedIds.length} PAPERS...</>
@@ -238,16 +240,16 @@ export function ResearchGapTab() {
 
       {/* Loading & Error States */}
       {error && (
-        <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center border border-red-500/30 bg-red-500/10 rounded-xl">
-          <AlertCircle className="w-6 h-6 text-red-400" />
-          <p className="text-xs font-mono text-red-400">{error}</p>
+        <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center border border-[#C3424D]/30 bg-[#C3424D]/10 rounded-xl">
+          <AlertCircle className="w-6 h-6 text-[#C3424D]" />
+          <p className="text-xs font-mono text-[#C3424D]">{error}</p>
         </div>
       )}
 
       {!gapData && !isLoading && !error && (
-        <div className="rounded-xl flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/[0.08] bg-black/20">
-          <Lightbulb className="w-8 h-8 text-zinc-600 mb-2" />
-          <p className="text-xs text-zinc-400 font-mono">
+        <div className="rounded-xl flex flex-col items-center justify-center text-center p-6 border border-dashed border-[#EAE9EA] bg-white">
+          <Lightbulb className="w-8 h-8 text-[#585254] mb-2" />
+          <p className="text-xs text-[#585254] font-mono">
             Click &quot;DETECT GAPS&quot; above to synthesize limitations, open questions, and research gaps across your selected manuscripts.
           </p>
         </div>
@@ -257,12 +259,12 @@ export function ResearchGapTab() {
       {gapData && !isLoading && (
         <div className="space-y-4 pt-2">
           {/* Quality & Scope Banner */}
-          <div className="p-3 bg-cyan-950/30 border border-cyan-500/30 rounded-xl flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-300">
-              <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
-              <span>Evidence Quality: <strong className="text-white">{gapData.evidence_quality || "High Grounded Fidelity"}</strong></span>
+          <div className="p-3 bg-[#E8F2EE] border border-[#397F70]/30 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#397F70]">
+              <ShieldCheck className="w-4 h-4 text-[#397F70] shrink-0" />
+              <span>Evidence Quality: <strong className="text-[#251F21]">{gapData.evidence_quality || "High Grounded Fidelity"}</strong></span>
             </div>
-            <span className="text-[10px] font-mono text-zinc-400">{selectedIds.length} PAPERS AUDITED</span>
+            <span className="text-[10px] font-mono text-[#585254]">{selectedIds.length} PAPERS AUDITED</span>
           </div>
 
           <ExpandableGapSection 
@@ -271,24 +273,47 @@ export function ResearchGapTab() {
             content={gapData.current_research_coverage || gapData.research_coverage} 
             isExpanded={!!expandedSections.coverage} 
             onToggle={toggleSection}
-            icon={<Layers className="w-3.5 h-3.5 text-cyan-400" />}
+            icon={<Layers className="w-3.5 h-3.5 text-[#397F70]" />}
           />
 
           {/* Detailed Research Gaps List */}
-          <div className="rounded-xl bg-[#131418] border border-white/[0.07] overflow-hidden">
+          <div className="rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] overflow-hidden">
             <button 
               onClick={() => toggleSection("detailedGaps")}
-              className="w-full flex items-center justify-between p-4 text-left bg-white/[0.02] hover:bg-white/[0.04] transition-colors cursor-pointer"
+              className="w-full flex items-center justify-between p-4 text-left bg-white hover:bg-black/[0.04] transition-colors cursor-pointer"
             >
-              <span className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-purple-400" />
+              <span className="text-xs font-mono font-bold text-[#8469AE] uppercase tracking-wider flex items-center gap-2">
+                <Target className="w-3.5 h-3.5 text-[#8469AE]" />
                 Unresolved Research Gaps ({rawGaps.length})
               </span>
-              {expandedSections.detailedGaps ? <ChevronUp className="w-4 h-4 text-zinc-400" /> : <ChevronDown className="w-4 h-4 text-zinc-400" />}
+              {expandedSections.detailedGaps ? <ChevronUp className="w-4 h-4 text-[#585254]" /> : <ChevronDown className="w-4 h-4 text-[#585254]" />}
             </button>
             {expandedSections.detailedGaps && (
-              <div className="p-4 border-t border-white/[0.06] space-y-3 bg-black/20">
-                {rawGaps.map((item, idx) => {
+              <div className="p-4 border-t border-[#EAE9EA] space-y-3 bg-white">
+                {/* List | Grid switcher (switching preserves the loaded analysis - no re-fetch) */}
+                <div className="flex items-center justify-end gap-1 p-0.5 rounded-lg bg-[#FBFCFC] border border-[#EAE9EA] w-fit ml-auto">
+                  <button
+                    onClick={() => setGapViewMode('list')}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer ${gapViewMode === 'list' ? 'bg-[#E8F2EE] text-[#397F70]' : 'text-[#585254] hover:text-[#251F21]'}`}
+                  >
+                    <List className="w-3 h-3" /> LIST
+                  </button>
+                  <button
+                    onClick={() => setGapViewMode('grid')}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition-all cursor-pointer ${gapViewMode === 'grid' ? 'bg-[#E8F2EE] text-[#397F70]' : 'text-[#585254] hover:text-[#251F21]'}`}
+                  >
+                    <LayoutGrid className="w-3 h-3" /> GRID
+                  </button>
+                </div>
+
+                {gapViewMode === 'grid' ? (
+                  <GapConfidenceGrid
+                    gaps={rawGaps}
+                    expandedChip={expandedGridChip}
+                    onToggleChip={(key) => setExpandedGridChip(expandedGridChip === key ? null : key)}
+                  />
+                ) : (
+                rawGaps.map((item, idx) => {
                   const isObj = typeof item === 'object' && item !== null;
                   const title = isObj ? (item as DetailedGapItem).gap : String(item);
                   const type = isObj ? (item as DetailedGapItem).type : 'explicit';
@@ -297,36 +322,36 @@ export function ResearchGapTab() {
                   const evidenceList = isObj ? (item as DetailedGapItem).evidence : [];
 
                   return (
-                    <div key={idx} className="p-3 bg-white/[0.02] border border-white/[0.04] hover:border-purple-500/30 rounded-xl space-y-2 transition-colors">
+                    <div key={idx} className="p-3 bg-white border border-[#EAE9EA] hover:border-[#8469AE]/30 rounded-xl space-y-2 transition-colors">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-2">
-                          <span className="text-purple-400 font-mono font-bold text-xs shrink-0">0{idx+1}.</span>
-                          <span className="text-xs font-bold text-zinc-200">{title}</span>
+                          <span className="text-[#8469AE] font-mono font-bold text-xs shrink-0">0{idx+1}.</span>
+                          <span className="text-xs font-bold text-[#251F21]">{title}</span>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className={`text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border ${
                             type === 'explicit' 
-                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                              : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              ? 'bg-[#23825A]/10 text-[#23825A] border-[#23825A]/20' 
+                              : 'bg-[#A87513]/10 text-[#A87513] border-[#A87513]/20'
                           }`}>
                             {type || 'explicit'}
                           </span>
                           {confidence && (
-                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
+                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#FBFCFC] text-[#585254] border border-[#EAE9EA]">
                               {confidence} conf
                             </span>
                           )}
                         </div>
                       </div>
                       {why && (
-                        <p className="text-[11px] text-zinc-400 pl-5">
-                          <strong className="text-zinc-300">Why it matters:</strong> {why}
+                        <p className="text-[11px] text-[#585254] pl-5">
+                          <strong className="text-[#251F21]">Why it matters:</strong> {why}
                         </p>
                       )}
                       {evidenceList && evidenceList.length > 0 && (
                         <div className="pl-5 pt-1 space-y-1">
                           {evidenceList.map((ev, eIdx) => (
-                            <div key={eIdx} className="text-[10px] font-mono text-zinc-400 italic bg-black/30 p-1.5 rounded border border-white/[0.02]">
+                            <div key={eIdx} className="text-[10px] font-mono text-[#585254] italic bg-[#FBFCFC] p-1.5 rounded border border-[#EAE9EA]">
                               &quot;{ev}&quot;
                             </div>
                           ))}
@@ -334,7 +359,8 @@ export function ResearchGapTab() {
                       )}
                     </div>
                   );
-                })}
+                })
+                )}
               </div>
             )}
           </div>
@@ -345,7 +371,7 @@ export function ResearchGapTab() {
             content={gapData.explicit_limitations} 
             isExpanded={!!expandedSections.limitations} 
             onToggle={toggleSection}
-            icon={<AlertCircle className="w-3.5 h-3.5 text-amber-400" />}
+            icon={<AlertCircle className="w-3.5 h-3.5 text-[#A87513]" />}
           />
 
           <ExpandableGapSection 
@@ -354,7 +380,7 @@ export function ResearchGapTab() {
             content={gapData.common_themes} 
             isExpanded={!!expandedSections.themes} 
             onToggle={toggleSection}
-            icon={<CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+            icon={<CheckCircle2 className="w-3.5 h-3.5 text-[#23825A]" />}
           />
 
           <ExpandableGapSection 
@@ -363,7 +389,7 @@ export function ResearchGapTab() {
             content={gapData.conflicting_findings} 
             isExpanded={!!expandedSections.conflicts} 
             onToggle={toggleSection}
-            icon={<AlertCircle className="w-3.5 h-3.5 text-red-400" />}
+            icon={<AlertCircle className="w-3.5 h-3.5 text-[#C3424D]" />}
           />
 
           <ExpandableGapSection 
@@ -372,7 +398,7 @@ export function ResearchGapTab() {
             content={gapData.future_research_opportunities} 
             isExpanded={!!expandedSections.opportunities} 
             onToggle={toggleSection}
-            icon={<Sparkles className="w-3.5 h-3.5 text-purple-400" />}
+            icon={<Sparkles className="w-3.5 h-3.5 text-[#8469AE]" />}
           />
 
           <ExpandableGapSection 
@@ -381,10 +407,128 @@ export function ResearchGapTab() {
             content={gapData.potential_research_questions || gapData.research_questions} 
             isExpanded={!!expandedSections.questions} 
             onToggle={toggleSection}
-            icon={<HelpCircle className="w-3.5 h-3.5 text-cyan-400" />}
+            icon={<HelpCircle className="w-3.5 h-3.5 text-[#397F70]" />}
           />
         </div>
       )}
+    </div>
+  );
+}
+
+
+// ------------------------------------------------------------------
+// Gap-confidence Grid: X = explicit vs inferred, Y = confidence
+// ------------------------------------------------------------------
+
+interface GapConfidenceGridProps {
+  gaps: (string | DetailedGapItem)[];
+  expandedChip: string | null;
+  onToggleChip: (key: string) => void;
+}
+
+const CONF_ROWS: { key: string; label: string; dot: string }[] = [
+  { key: 'high', label: 'High confidence', dot: '#397F70' },
+  { key: 'medium', label: 'Medium confidence', dot: '#A87513' },
+  { key: 'low', label: 'Low confidence', dot: '#585254' },
+];
+const TYPE_COLS = [
+  { key: 'explicit', label: 'Explicit' },
+  { key: 'inferred', label: 'Inferred' },
+];
+
+function normalizeGap(item: string | DetailedGapItem): DetailedGapItem {
+  if (typeof item === 'object' && item !== null) return item;
+  return { gap: String(item), type: 'explicit', confidence: 'medium' };
+}
+
+function GapConfidenceGrid({ gaps, expandedChip, onToggleChip }: GapConfidenceGridProps) {
+  const normalized = gaps.map((g, i) => ({ ...normalizeGap(g), _key: `chip-${i}` }));
+  const cellOf = (type: string, conf: string) =>
+    normalized.filter((g) => {
+      const t = (g.type || 'explicit').toLowerCase() === 'explicit' ? 'explicit' : 'inferred';
+      const c = ['high', 'medium', 'low'].includes((g.confidence || '').toLowerCase()) ? (g.confidence || '').toLowerCase() : 'medium';
+      return t === type && c === conf;
+    });
+
+  return (
+    <div className="space-y-2">
+      {/* Column headers */}
+      <div className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+        <div />
+        {TYPE_COLS.map((col) => (
+          <div key={col.key} className="text-center text-[10px] font-mono font-bold uppercase tracking-wider text-[#585254] py-1">
+            {col.label} ({normalized.filter((g) => ((g.type || 'explicit').toLowerCase() === 'explicit' ? 'explicit' : 'inferred') === col.key).length})
+          </div>
+        ))}
+      </div>
+      {CONF_ROWS.map((row) => (
+        <div key={row.key} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-stretch">
+          <div className="flex items-center gap-1.5 pr-1 w-24">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: row.dot }} />
+            <span className="text-[9px] font-mono font-bold uppercase tracking-wide text-[#585254] leading-tight">{row.label.replace(' confidence', '')}</span>
+          </div>
+          {TYPE_COLS.map((col) => {
+            const cell = cellOf(col.key, row.key);
+            return (
+              <div key={col.key} className="rounded-xl border border-[#EAE9EA] bg-[#FBFCFC] p-2 space-y-2 min-h-[3.5rem]">
+                {cell.length === 0 ? (
+                  <p className="text-[10px] text-[#585254]/60 italic text-center py-2">-</p>
+                ) : (
+                  cell.map((g) => {
+                    const expanded = expandedChip === g._key;
+                    return (
+                      <div
+                        key={g._key}
+                        onClick={() => onToggleChip(g._key)}
+                        className="rounded-lg bg-white border border-[#EAE9EA] hover:border-[#397F70]/40 p-2.5 cursor-pointer transition-all shadow-sm"
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: row.dot }} />
+                          <p className={`text-[11px] text-[#251F21] leading-snug flex-1 ${expanded ? '' : 'line-clamp-3'}`}>{g.gap}</p>
+                          {(g.supporting_papers?.length ?? 0) > 0 && (
+                            <span className="text-[9px] font-mono bg-[#E8F2EE] text-[#397F70] px-1.5 py-0.5 rounded shrink-0">
+                              {g.supporting_papers!.length}p
+                            </span>
+                          )}
+                        </div>
+                        {expanded && (
+                          <div className="mt-2 pt-2 border-t border-[#EAE9EA] space-y-2">
+                            {g.why_it_matters && (
+                              <div>
+                                <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#8469AE] mb-1">Why it matters</p>
+                                <p className="text-[11px] text-[#585254] leading-relaxed">{g.why_it_matters}</p>
+                              </div>
+                            )}
+                            {(g.evidence?.length ?? 0) > 0 && (
+                              <div>
+                                <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#397F70] mb-1">Evidence</p>
+                                <ul className="space-y-1">
+                                  {g.evidence!.map((e, ei) => (
+                                    <li key={ei} className="text-[11px] text-[#585254] leading-relaxed flex items-start gap-1.5">
+                                      <span className="text-[#397F70] shrink-0">-</span>
+                                      <span>{e}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {(g.supporting_papers?.length ?? 0) > 0 && (
+                              <div>
+                                <p className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#585254] mb-1">Supporting papers</p>
+                                <p className="text-[11px] text-[#585254]">{g.supporting_papers!.join(', ')}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

@@ -10,28 +10,12 @@ logger = logging.getLogger("researchgpt.retriever")
 
 def is_noise_or_reference_chunk(text: str) -> bool:
     """
-    Detects if a chunk is pure bibliography, citation index, or author affiliation noise.
+    Residual noise filter: very short chunks carry no retrievable content.
+    Bibliography/reference chunks are handled at ingestion time via the
+    `chunk_type` metadata flag (see document_processor.classify_chunk) and
+    filtered in retrieve_relevant_chunks - not here.
     """
-    if not text or len(text.strip()) < 40:
-        return True
-    
-    # Check for citation lists like [1] [2] [3] or [12], [13]
-    bracket_citations = re.findall(r'\[\d{1,3}\]', text)
-    if len(bracket_citations) >= 4:
-        return True
-    
-    # Check for DOI / URL repetition in references
-    doi_matches = re.findall(r'doi:\s*10\.\d+', text, re.IGNORECASE)
-    url_matches = re.findall(r'https?://', text, re.IGNORECASE)
-    if len(doi_matches) >= 2 or len(url_matches) >= 3:
-        return True
-    
-    # Check for copyright / author bio boilerplate
-    if "Marie Skłodowska-Curie Actions" in text or ("IEEE Transactions" in text and "Manuscript received" in text):
-        if len(re.findall(r'(Department|University|Institute|Laboratory|Faculty)', text)) >= 3 and len(text) < 400:
-            return True
-            
-    return False
+    return not text or len(text.strip()) < 40
 
 def get_expansion_queries(query: str) -> List[str]:
     """
@@ -56,13 +40,22 @@ def get_expansion_queries(query: str) -> List[str]:
 
     return list(dict.fromkeys(queries))  # preserve order & deduplicate
 
+def _skip_chunk(doc: str, meta: Dict[str, Any], include_references: bool) -> bool:
+    """Metadata-aware filter: reference chunks only pass when explicitly requested."""
+    if is_noise_or_reference_chunk(doc):
+        return True
+    if not include_references and (meta or {}).get("chunk_type") == "references":
+        return True
+    return False
+
 def retrieve_relevant_chunks(
     query: str,
     top_k: int = 5,
     filter_paper_id: Optional[str] = None,
     filter_paper_ids: Optional[List[str]] = None,
     expand_query: bool = True,
-    per_paper_balance: bool = False
+    per_paper_balance: bool = False,
+    include_references: bool = False
 ) -> List[Dict[str, Any]]:
     """
     Encodes query string(s) and performs multi-query vector search against ChromaDB.
@@ -126,7 +119,7 @@ def retrieve_relevant_chunks(
 
                 if res and res.get("documents") and res["documents"][0]:
                     for doc, meta, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0]):
-                        if is_noise_or_reference_chunk(doc):
+                        if _skip_chunk(doc, meta, include_references):
                             continue
                         sim = round(1.0 - float(dist), 4)
                         cid = f"{meta.get('paper_id')}_{meta.get('chunk_id')}"
@@ -170,7 +163,7 @@ def retrieve_relevant_chunks(
 
         if res and res.get("documents") and res["documents"][0]:
             for doc, meta, dist in zip(res["documents"][0], res["metadatas"][0], res["distances"][0]):
-                if is_noise_or_reference_chunk(doc):
+                if _skip_chunk(doc, meta, include_references):
                     continue
                 sim = round(1.0 - float(dist), 4)
                 p_id = meta.get("paper_id", "")
@@ -224,7 +217,7 @@ def format_citations(chunks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         text = str(c.get("chunk_text", c.get("text", "")) or "").strip()
         if not text or "No indexed document context available" in text:
             continue
-        snippet = text[:200] + ("..." if len(text) > 200 else "")
+        snippet = text[:600] + ("..." if len(text) > 600 else "")
         sim_score = c.get("similarity_score", 0.0)
 
         key = (pid, page)

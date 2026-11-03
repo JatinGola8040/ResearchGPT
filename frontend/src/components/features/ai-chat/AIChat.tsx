@@ -97,36 +97,36 @@ export function AIChat() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#030304] relative overflow-hidden z-10">
+    <div className="flex-1 flex flex-col h-full bg-[#F4EFEC] relative overflow-hidden z-10">
       {/* Studio Stage Header Badge */}
-      <div className="px-6 py-3 border-b border-white/[0.06] bg-[#0B0C0E]/70 backdrop-blur-xl flex items-center justify-between shrink-0 shadow-sm">
+      <div className="px-6 py-3 border-b border-[#EAE9EA] bg-white/70 backdrop-blur-xl flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#38bdf8]" />
+          <span className="w-2 h-2 rounded-full bg-[#397F70] animate-pulse shadow-[0_0_8px_#397F70]" />
           {activePaper ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-cyan-300 tracking-wider">
+              <span className="text-xs font-mono font-bold text-[#397F70] tracking-wider">
                 SCOPE: {activePaper.title.slice(0, 28)}...
               </span>
               <button 
                 onClick={() => setSelectedPaperId(null)}
-                className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+                className="flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#FBFCFC] hover:bg-[#EAE9EA] text-[#251F21] transition-colors"
                 title="Search all papers instead"
               >
                 <X className="w-3 h-3" /> All Papers
               </button>
             </div>
           ) : (
-            <span className="text-xs font-mono font-bold text-zinc-300 tracking-wider">
+            <span className="text-xs font-mono font-bold text-[#251F21] tracking-wider">
               ALL CORPUS PAPERS ({papers.length})
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3.5 text-[11px] font-mono text-zinc-400">
-          <span className="flex items-center gap-1.5 text-cyan-300 font-semibold">
-            <Sparkles className="w-3.5 h-3.5" /> gpt-oss
+        <div className="flex items-center gap-3.5 text-[11px] font-mono text-[#585254]">
+          <span className="flex items-center gap-1.5 text-[#397F70] font-semibold">
+            <Sparkles className="w-3.5 h-3.5" /> gemini-3.5-flash
           </span>
-          <span className="text-zinc-600">•</span>
-          <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+          <span className="text-[#585254]">•</span>
+          <span className="flex items-center gap-1.5 text-[#23825A] font-semibold">
             <ShieldCheck className="w-3.5 h-3.5" /> Verified Citations
           </span>
         </div>
@@ -151,10 +151,10 @@ export function AIChat() {
       </div>
 
       {/* Floating Input Console Area */}
-      <div className="pt-2 pb-5 px-4 bg-gradient-to-t from-[#030304] via-[#030304]/90 to-transparent shrink-0 z-20">
+      <div className="pt-2 pb-5 px-4 bg-gradient-to-t from-[#F4EFEC] via-[#F4EFEC]/90 to-transparent shrink-0 z-20">
         <div className="max-w-4xl mx-auto">
           <ChatInput onSend={handleSendMessage} disabled={isTyping} />
-          <p className="text-center text-[11px] text-zinc-500 font-mono mt-2 tracking-wide">
+          <p className="text-center text-[11px] text-[#585254] font-mono mt-2 tracking-wide">
             ResearchGPT Grounded RAG with strict citation verification across indexed manuscripts.
           </p>
         </div>

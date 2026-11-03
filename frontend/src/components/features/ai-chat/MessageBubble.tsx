@@ -6,6 +6,7 @@ import { useUpload } from "../pdf-upload/UploadContext";
 import { Citation } from "./AIChat";
 import { motion } from "framer-motion";
 import { MarkdownRenderer } from "../../ui/MarkdownRenderer";
+import { HoverPopover } from "../../ui/HoverPopover";
 
 interface MessageBubbleProps {
   role: 'user' | 'assistant';
@@ -35,6 +36,13 @@ const getSnippet = (cit: CitationItem): string => {
 const getPaperId = (cit: CitationItem): string | undefined => {
   if (typeof cit !== 'object' || cit === null) return undefined;
   return cit.paper_id ? String(cit.paper_id) : undefined;
+};
+
+const getRelevance = (cit: CitationItem): number => {
+  if (typeof cit !== 'object' || cit === null) return 0;
+  const raw = (cit as Record<string, unknown>).relevance_score;
+  const n = typeof raw === 'number' ? raw : parseFloat(String(raw ?? "0"));
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0;
 };
 
 export function MessageBubble({ role, content, citations, isLoadingCitations, citationError }: MessageBubbleProps) {
@@ -72,17 +80,17 @@ export function MessageBubble({ role, content, citations, isLoadingCitations, ci
       {/* Avatar Badge */}
       <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border shadow-lg mt-0.5 ${
         isUser 
-          ? 'bg-[#15161A] border-white/[0.12] text-zinc-300' 
-          : 'bg-gradient-to-br from-cyan-500/25 via-purple-500/15 to-transparent border-cyan-400/40 text-cyan-300 shadow-[0_0_15px_rgba(56,189,248,0.25)]'
+          ? 'bg-white border-[#EAE9EA] text-[#251F21]' 
+          : 'bg-[#E8F2EE] border-[#397F70]/40 text-[#397F70] shadow-md'
       }`}>
         {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
       </div>
 
       {/* Bubble Container */}
-      <div className={`flex-1 flex flex-col gap-3 p-5 rounded-2xl shadow-2xl transition-all duration-300 ${
+      <div className={`flex-1 flex flex-col gap-3 p-5 rounded-2xl shadow-md transition-all duration-300 ${
         isUser 
-          ? 'bg-[#15161B] border border-white/[0.1] text-white rounded-tr-sm ml-12' 
-          : 'bg-[#0E0F13]/85 backdrop-blur-xl border border-white/[0.08] text-zinc-200 rounded-tl-sm hover:border-white/[0.14] mr-4'
+          ? 'bg-[#FFFFFF] border border-[#EAE9EA] text-[#251F21] rounded-tr-sm ml-12' 
+          : 'bg-white backdrop-blur-xl border border-[#EAE9EA] text-[#251F21] rounded-tl-sm hover:border-[#EAE9EA] mr-4'
       }`}>
         {isUser ? (
           <p className="leading-relaxed whitespace-pre-wrap text-sm md:text-base font-sans tracking-normal">{content}</p>
@@ -91,24 +99,24 @@ export function MessageBubble({ role, content, citations, isLoadingCitations, ci
         )}
         
         {role === 'assistant' && (citations !== undefined || isLoadingCitations || citationError) && (
-          <div className="mt-2 pt-4 border-t border-white/[0.07] w-full space-y-3">
-            <h4 className="text-[11px] font-mono font-bold text-zinc-400 flex items-center gap-1.5 uppercase tracking-wider">
-              <Quote className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="mt-2 pt-4 border-t border-[#EAE9EA] w-full space-y-3">
+            <h4 className="text-[11px] font-mono font-bold text-[#585254] flex items-center gap-1.5 uppercase tracking-wider">
+              <Quote className="w-3.5 h-3.5 text-[#397F70]" />
               <span>Grounded Evidence & Citations</span>
             </h4>
 
             {isLoadingCitations ? (
-              <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#131418] border border-white/[0.06] text-xs text-zinc-400 font-mono shadow-inner">
-                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+              <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] text-xs text-[#585254] font-mono shadow-inner">
+                <Loader2 className="w-4 h-4 animate-spin text-[#397F70]" />
                 <span>Extracting semantic vector passages...</span>
               </div>
             ) : citationError ? (
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono">
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-[#C3424D]/10 border border-[#C3424D]/30 text-xs text-[#C3424D] font-mono">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>Backend retrieval error: {citationError}</span>
               </div>
             ) : (!Array.isArray(citations) || citations.length === 0) ? (
-              <div className="p-3 rounded-xl bg-black/40 border border-white/[0.05] text-xs text-zinc-500 font-mono italic">
+              <div className="p-3 rounded-xl bg-[#FBFCFC] border border-[#EAE9EA] text-xs text-[#585254] font-mono italic">
                 No direct manuscript passages required for this response.
               </div>
             ) : (
@@ -126,41 +134,59 @@ export function MessageBubble({ role, content, citations, isLoadingCitations, ci
                       key={idx}
                       whileHover={{ scale: 1.008 }}
                       transition={{ duration: 0.15 }}
-                      className="p-4 rounded-xl bg-[#131418]/90 border border-white/[0.08] hover:border-cyan-500/40 transition-all duration-200 flex flex-col gap-2.5 shadow-md"
+                      className="p-4 rounded-xl bg-[#FBFCFC]/90 border border-[#EAE9EA] hover:border-[#397F70]/40 transition-all duration-200 flex flex-col gap-2.5 shadow-md"
                     >
-                      <div className="flex items-start justify-between gap-2 border-b border-white/[0.06] pb-2.5 flex-wrap">
-                        <div className="font-semibold text-xs text-white flex items-center gap-1.5 line-clamp-1">
-                          <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono text-[10px] font-bold">[{idx + 1}]</span>
-                          <span>📄 {title}</span>
-                        </div>
+                      <div className="flex items-start justify-between gap-2 border-b border-[#EAE9EA] pb-2.5 flex-wrap">
+                        <HoverPopover
+                          trigger={
+                            <span className="font-semibold text-xs text-[#251F21] flex items-center gap-1.5 line-clamp-1 cursor-help">
+                              <span className="px-2 py-0.5 rounded bg-[#397F70]/20 text-[#397F70] font-mono text-[10px] font-bold">[{idx + 1}]</span>
+                              <span className="underline decoration-dotted decoration-[#397F70]/50 underline-offset-2">📄 {title}</span>
+                            </span>
+                          }
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="font-semibold text-xs text-[#397F70] line-clamp-2">{title}</span>
+                              <span className="text-[10px] font-mono bg-[#FBFCFC] border border-[#EAE9EA] text-[#251F21] px-2 py-0.5 rounded shrink-0">Pg. {page}</span>
+                            </div>
+                            <p className="text-xs text-[#585254] leading-relaxed max-h-48 overflow-y-auto custom-scrollbar">{snippet}</p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1 rounded-full bg-[#F7F3F1] overflow-hidden">
+                                <div className="h-full rounded-full bg-[#397F70]" style={{ width: `${Math.round(getRelevance(cit) * 100)}%` }} />
+                              </div>
+                              <span className="text-[10px] font-mono text-[#585254]">{Math.round(getRelevance(cit) * 100)}%</span>
+                            </div>
+                          </div>
+                        </HoverPopover>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] font-mono bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded flex items-center gap-1 font-bold">
+                          <span className="text-[10px] font-mono bg-[#23825A]/10 border border-[#23825A]/30 text-[#23825A] px-2 py-0.5 rounded flex items-center gap-1 font-bold">
                             <ShieldAlert className="w-3 h-3" /> {confidenceScore}% Match
                           </span>
-                          <span className="text-[10px] font-mono bg-white/[0.05] border border-white/[0.08] text-zinc-300 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-mono bg-white/[0.05] border border-[#EAE9EA] text-[#251F21] px-2 py-0.5 rounded">
                             Pg. {page}
                           </span>
                         </div>
                       </div>
 
-                      <div className="text-xs text-zinc-300 leading-relaxed pl-3.5 border-l-2 border-cyan-500/60 italic font-serif">
+                      <div className="text-xs text-[#251F21] leading-relaxed pl-3.5 border-l-2 border-[#397F70]/60 italic font-serif">
                         &quot;{snippet}&quot;
                       </div>
 
                       <div className="flex items-center justify-end gap-2 pt-1">
                         <button
                           onClick={() => handleViewPaper(title, paperId)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-cyan-500/20 border border-white/[0.06] hover:border-cyan-500/40 text-[11px] font-medium text-zinc-300 hover:text-cyan-300 transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-[#397F70]/20 border border-[#EAE9EA] hover:border-[#397F70]/40 text-[11px] font-medium text-[#251F21] hover:text-[#397F70] transition-all cursor-pointer"
                         >
                           <ExternalLink className="w-3 h-3" />
                           View Source
                         </button>
                         <button
                           onClick={() => handleCopyCitation(cit, idx)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-purple-500/20 border border-white/[0.06] hover:border-purple-500/40 text-[11px] font-medium text-zinc-400 hover:text-purple-300 transition-all cursor-pointer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] hover:bg-[#8469AE]/20 border border-[#EAE9EA] hover:border-[#8469AE]/40 text-[11px] font-medium text-[#585254] hover:text-[#8469AE] transition-all cursor-pointer"
                         >
-                          {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                          {isCopied ? <span className="text-emerald-400">Copied</span> : "Copy"}
+                          {isCopied ? <Check className="w-3 h-3 text-[#23825A]" /> : <Copy className="w-3 h-3" />}
+                          {isCopied ? <span className="text-[#23825A]">Copied</span> : "Copy"}
                         </button>
                       </div>
                     </motion.div>

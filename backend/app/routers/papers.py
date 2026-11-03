@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import uuid
@@ -7,7 +8,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, B
 from sqlalchemy.orm import Session
 
 from app.database import get_db, SessionLocal
-from app.models import Paper
+from app.models import Paper, PaperReference, AnalysisCache
 from app.schemas import (
     PaperResponse, PaperSummaryResponse, ComparePapersRequest, ComparePapersResponse,
     GapAnalysisRequest, GapAnalysisResponse, LiteratureReviewRequest, LiteratureReviewResponse,
@@ -15,7 +16,8 @@ from app.schemas import (
 )
 from app.config import settings
 from app.services.pdf.pdf_parser import parse_pdf
-from app.services.pdf.document_processor import process_document
+from app.services.pdf.document_processor import process_document, classify_chunk
+from app.services.pdf.reference_extractor import extract_and_store_references, rematch_all_references
 from app.services.vector.embedding_service import generate_chunk_embeddings
 from app.services.vector.vector_store import vector_store_service
 from app.services.ai.summary_service import generate_paper_summary
@@ -44,8 +46,13 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
         # Step 1: Parse PDF
         parsed = parse_pdf(file_path)
         
-        # Step 2: Clean & Chunk document
+        # Step 2: Clean & Chunk document, then tag bibliography chunks (Phase 0 groundwork)
         processed = process_document(parsed)
+        page_text_map = {p.get("page", 1): p.get("text", "") for p in parsed.get("pages", [])}
+        for chunk in processed.get("chunks", []):
+            chunk["chunk_type"] = classify_chunk(
+                chunk.get("text", ""), page_text_map.get(chunk.get("page", 1), "")
+            )
         
         meta = processed.get("metadata", {})
         if meta.get("title") and not paper.title:
@@ -63,6 +70,15 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
         paper.status = "indexed"
         db.commit()
         logger.info(f"Successfully indexed paper {paper_id} with {stored_count} chunks.")
+
+        # Step 6: Structured reference extraction (best effort - never blocks ingestion)
+        reference_chunks = [
+            c.get("text", "") for c in processed.get("chunks", [])
+            if c.get("chunk_type") == "references"
+        ]
+        if reference_chunks:
+            extract_and_store_references(db, paper_id, reference_chunks)
+            rematch_all_references(db)
     except Exception as e:
         paper.status = "failed"
         paper.error_message = str(e)
@@ -70,48 +86,6 @@ def run_ingestion_pipeline_task(paper_id: str, file_path: str):
         logger.error(f"Ingestion pipeline failed for paper {paper_id}: {e}")
     finally:
         db.close()
-
-@router.post("/process/{paper_id}", status_code=200)
-def process_paper_test(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]:
-    """
-    Synchronous testing endpoint executing the complete document processing & indexing pipeline.
-    """
-    paper = db.query(Paper).filter(Paper.id == paper_id).first()
-    if not paper:
-        raise HTTPException(status_code=404, detail="Paper not found.")
-
-    if not os.path.exists(paper.filepath):
-        raise HTTPException(status_code=404, detail=f"PDF file missing on disk at {paper.filepath}")
-
-    try:
-        parsed = parse_pdf(paper.filepath)
-        processed = process_document(parsed)
-        
-        meta = processed.get("metadata", {})
-        if meta.get("title") and not paper.title:
-            paper.title = meta.get("title")
-        if meta.get("page_count"):
-            paper.pages = str(meta.get("page_count"))
-
-        embedded_chunks = generate_chunk_embeddings(processed.get("chunks", []))
-        chunks_stored = vector_store_service.add_document(paper_id=paper.id, embedded_chunks=embedded_chunks)
-
-        paper.status = "indexed"
-        db.commit()
-        db.refresh(paper)
-
-        return {
-            "paper_id": paper.id,
-            "status": paper.status,
-            "title": paper.title,
-            "chunks_generated": len(processed.get("chunks", [])),
-            "chunks_indexed": chunks_stored
-        }
-    except Exception as e:
-        paper.status = "failed"
-        paper.error_message = str(e)
-        db.commit()
-        raise HTTPException(status_code=500, detail=f"Indexing pipeline failed: {str(e)}")
 
 @router.post("/upload", response_model=PaperResponse, status_code=201)
 def upload_paper(
@@ -373,6 +347,17 @@ def delete_paper(paper_id: str, db: Session = Depends(get_db)) -> Dict[str, Any]
             os.remove(paper.filepath)
         except Exception as e:
             logger.warning(f"Failed to remove PDF file from disk: {e}")
+
+    db.query(PaperReference).filter(PaperReference.paper_id == paper_id).delete()
+    db.query(PaperReference).filter(PaperReference.matched_paper_id == paper_id).update(
+        {PaperReference.matched_paper_id: None}
+    )
+    for cache_row in db.query(AnalysisCache).all():
+        try:
+            if paper_id in json.loads(cache_row.paper_ids or "[]"):
+                db.delete(cache_row)
+        except Exception:
+            continue
 
     db.delete(paper)
     db.commit()
